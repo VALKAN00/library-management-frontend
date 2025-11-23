@@ -1,11 +1,23 @@
+import { Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
+import Home from './pages/Home'
+import Books from './pages/Books'
+import Members from './pages/Members'
+import Borrowings from './pages/Borrowings'
+import NotFound from './pages/NotFound'
 import './App.css'
 
 function App() {
-
   return (
-    <>
-      <h1 className="text-3xl font-bold underline text-red-800">Welcome to the Library Management System</h1>
-    </>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="books" element={<Books />} />
+        <Route path="members" element={<Members />} />
+        <Route path="borrowings" element={<Borrowings />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }
 
