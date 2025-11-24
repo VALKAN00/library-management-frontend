@@ -1,29 +1,19 @@
+import BooksCard from "../components/browseBooks/BooksCard"
+import Filter from "../components/browseBooks/Filter"
 function Books() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-6">Books</h1>
-      <div className="mb-6">
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Add New Book
-        </button>
-      </div>
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ISBN</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap" colSpan="5">No books found</td>
-            </tr>
-          </tbody>
-        </table>
+      <Filter />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <BooksCard title= "harry potter" author = "JK Rowling" genre = "Fiction" date = "2020" rating= "4.5" status= "Available" />
+        <BooksCard title= "dune" author = "Frank Herbert" genre = "Science Fiction" date = "1965" rating= "4.8" status= "Unavailable" />
+        <BooksCard title= "the lord of the rings" author = "JRR Tolkien" genre = "Fantasy" date = "1954" rating= "4.9" status= "Available" />
+        <BooksCard title= "to kill a mockingbird" author = "Harper Lee" genre = "Fiction" date = "1960" rating= "4.7" status= "Available" />
+        <BooksCard title= "harry potter" author = "JK Rowling" genre = "Fiction" date = "2020" rating= "4.5" status= "Available" />
+        <BooksCard title= "dune" author = "Frank Herbert" genre = "Science Fiction" date = "1965" rating= "4.8" status= "Unavailable" />
+        <BooksCard title= "the lord of the rings" author = "JRR Tolkien" genre = "Fantasy" date = "1954" rating= "4.9" status= "Available" />
+        <BooksCard title= "to kill a mockingbird" author = "Harper Lee" genre = "Fiction" date = "1960" rating= "4.7" status= "Available" />
       </div>
     </div>
   )
