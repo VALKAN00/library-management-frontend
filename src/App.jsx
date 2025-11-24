@@ -7,11 +7,15 @@ import Borrowings from './pages/Borrowings'
 import History from './pages/History'
 import Notifications from './pages/Notifications'
 import NotFound from './pages/NotFound'
+import LoginPage from './pages/LoginPage'
+import SignUPPage from './pages/SignUPPage'
 import './App.css'
 
 function App() {
   return (
     <Routes>
+       <Route path="login" element={<LoginPage />} />
+       <Route path="signup" element={<SignUPPage />} />
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="books" element={<Books />} />
@@ -19,6 +23,7 @@ function App() {
         <Route path="borrowings" element={<Borrowings />} />
         <Route path="history" element={<History />} />
         <Route path="notifications" element={<Notifications />} />
+       
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
