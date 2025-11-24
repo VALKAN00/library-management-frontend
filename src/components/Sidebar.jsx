@@ -1,0 +1,48 @@
+import { NavLink } from 'react-router-dom'
+import { LayoutDashboard, BookOpen, Clock, Bell, LogOut, LibraryBig } from 'lucide-react'
+
+function Sidebar() {
+  const menuItems = [
+    { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/books', icon: BookOpen, label: 'Browse Books' },
+    { path: '/borrowings', icon: LibraryBig, label: 'My Borrowings' },
+    { path: '/history', icon: Clock, label: 'History' },
+    { path: '/notifications', icon: Bell, label: 'Notifications' },
+  ]
+
+  const getLinkClass = ({ isActive }) =>
+    `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+      isActive
+        ? 'bg-indigo-100 text-indigo-600 font-medium'
+        : 'text-gray-600 hover:bg-gray-100'
+    }`
+
+  return (
+    <aside className="w-64 bg-white flex flex-col border-r border-gray-200">
+      {/* Navigation Menu */}
+      <nav className="flex-1 p-4 space-y-1 pt-4">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={getLinkClass}
+            end={item.path === '/'}
+          >
+            <item.icon className="w-5 h-5" />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* Logout Section */}
+      <div className="p-4 border-t border-gray-200">
+        <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 w-full transition-all">
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+  )
+}
+
+export default Sidebar
