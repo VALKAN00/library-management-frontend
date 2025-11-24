@@ -5,7 +5,7 @@ function Notifications() {
       <div className="space-y-4">
         <div className="bg-white shadow-md rounded-lg p-6">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
               <span className="text-blue-600 text-xl">📚</span>
             </div>
             <div className="flex-1">

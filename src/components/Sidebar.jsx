@@ -18,9 +18,9 @@ function Sidebar() {
     }`
 
   return (
-    <aside className="w-64 bg-white flex flex-col border-r border-gray-200">
+    <aside className="w-64 bg-white flex flex-col border-r border-gray-200 fixed left-0 top-16 bottom-0 z-40">
       {/* Navigation Menu */}
-      <nav className="flex-1 p-4 space-y-1 pt-4">
+      <nav className="flex-1 p-4 space-y-1 pt-4 overflow-y-auto">
         {menuItems.map((item) => (
           <NavLink
             key={item.path}

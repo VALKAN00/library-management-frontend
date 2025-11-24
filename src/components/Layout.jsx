@@ -4,14 +4,12 @@ import Sidebar from "./sidebar"
 
 function Layout() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-100">
       <Header />
-      <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1 overflow-auto">
-          <Outlet />
-        </main>
-      </div>
+      <Sidebar />
+      <main className="ml-64 mt-16 p-6">
+        <Outlet />
+      </main>
     </div>
   )
 }
