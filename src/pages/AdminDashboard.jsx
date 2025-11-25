@@ -1,5 +1,5 @@
 import StatusCard from "../components/adminDashboard/StatusCard";
-import ExamScheduleTable from "../components/adminDashboard/Borrowings";
+import BorrowingsTable from "../components/adminDashboard/Borrowings";
 import PeopleIcon from '@mui/icons-material/People';
 import { BookOpenCheck } from "lucide-react";
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   ))}
 </div>
 
-<div className="mt-6"><ExamScheduleTable /> </div>
+<div className="mt-6"><BorrowingsTable /> </div>
 
         </div>
     );
