@@ -3,12 +3,13 @@ import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import {Pencil ,Trash} from 'lucide-react';
 import Person2Icon from '@mui/icons-material/Person2';
+import SearchIcon from '@mui/icons-material/Search';
 
 const columns = [
   { field: 'name', headerName: 'Name', flex: 1 ,
     renderCell: (params) => (
       <div className="flex items-center gap-2">
-        {params.value.img ? params.value.img : <PeopleIcon style={{ color: 'gray' }} />}
+        {params.value.img ? params.value.img : <Person2Icon style={{ color: 'gray' }} />}
         <span>{params.value.name}</span>
       </div>
     ),
@@ -39,7 +40,7 @@ const columns = [
     ),
   },
   { field: 'actions', headerName: 'Actions', flex: 1 ,
-    renderCell: (params) => (
+    renderCell: () => (
       <div className="flex gap-2">
         <button className="text-gray-600 font-bold hover:text-blue-800"><Pencil className="inline-block mr-1" /></button>
         <button className="text-gray-600 font-bold hover:text-red-800"><Trash className="inline-block mr-1" /></button>
@@ -113,7 +114,7 @@ const rows = [
 
 
 
-export default function GradesTable() {
+export default function UsersTable() {
   return (
     <Box 
       className="bg-white p-4 rounded-lg shadow-lg w-full" 
@@ -123,6 +124,7 @@ export default function GradesTable() {
         overflow: 'auto'
       }}
     >
+       <button className='bg-gray-300 my-3 h-10 px-2 rounded'><div className='flex gap-2'><div> <SearchIcon /></div><div><input type="text" placeholder="Search users..." /></div></div></button>
       <DataGrid
         rows={rows}
         columns={columns }
