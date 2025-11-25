@@ -43,7 +43,7 @@ const initialRows = [
 
 ];
 
-export default function ExamScheduleTable() {
+export default function BorrowingsTable() {
   // State for managing rows
   const [rows, setRows] = useState(initialRows);
 
