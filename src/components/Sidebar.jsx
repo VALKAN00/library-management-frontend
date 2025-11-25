@@ -6,11 +6,13 @@ function Sidebar() {
   const menuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/books', icon: BookOpen, label: 'Browse Books' },
-    { path: '/borrowings', icon: LibraryBig, label: 'My Borrowings' },
+    { path: '/myborrowings', icon: LibraryBig, label: 'My Borrowings' },
+    { path: '/reservations', icon: LibraryBig, label: 'My Reservations' },
     { path: '/history', icon: Clock, label: 'History' },
     { path: '/notifications', icon: Bell, label: 'Notifications' },
     {path:'/admindashboard', icon: LayoutDashboard, label: 'Admin Dashboard' },
     {path:'/mangeusers', icon: PeopleIcon, label: 'Manage Users' },
+    {path:'/BooksManagement', icon: LibraryBig, label: 'Books Management' },
   ]
 
   const getLinkClass = ({ isActive }) =>
