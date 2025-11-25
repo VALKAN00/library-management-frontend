@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import UserDashboard from './pages/UserDashboard'
 import Books from './pages/Books'
+import BookDetails from './pages/BookDetails'
 import Members from './pages/Members'
 import Borrowings from './pages/Borrowings'
 import History from './pages/History'
@@ -21,6 +22,7 @@ function App() {
         <Route index element={<UserDashboard />} />
         <Route path="dashboard" element={<UserDashboard />} />
         <Route path="books" element={<Books />} />
+        <Route path="books/:id" element={<BookDetails />} />
         <Route path="members" element={<Members />} />
         <Route path="borrowings" element={<Borrowings />} />
         <Route path="history" element={<History />} />

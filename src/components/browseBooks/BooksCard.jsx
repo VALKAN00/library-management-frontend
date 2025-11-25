@@ -1,4 +1,7 @@
+import { useNavigate } from 'react-router-dom'
+
 export default function BooksCard({
+  id,
   title,
   author,
   genre,
@@ -7,8 +10,17 @@ export default function BooksCard({
   rating,
   status,
 }) {
+  const navigate = useNavigate()
+
+  const handleClick = () => {
+    navigate(`/books/${id}`)
+  }
+
   return (
-    <div className="bg-white flex-col justify-start shadow-md rounded-xl gap-4 hover:bg-gray-100 transition-colors duration-300 ease-in-out cursor-pointer">
+    <div 
+      onClick={handleClick}
+      className="bg-white flex-col justify-start shadow-md rounded-xl gap-4 hover:bg-gray-100 transition-colors duration-300 ease-in-out cursor-pointer"
+    >
       <img
         src={coverImage}
         alt={title}
