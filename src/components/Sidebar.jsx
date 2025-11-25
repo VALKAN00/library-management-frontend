@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, Clock, Bell, LogOut, LibraryBig } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Clock, ChartBar, LogOut, LibraryBig } from 'lucide-react'
 import PeopleIcon from '@mui/icons-material/People';
 
 function Sidebar() {
@@ -9,10 +9,10 @@ function Sidebar() {
     { path: '/myborrowings', icon: LibraryBig, label: 'My Borrowings' },
     { path: '/reservations', icon: LibraryBig, label: 'My Reservations' },
     { path: '/history', icon: Clock, label: 'History' },
-    { path: '/notifications', icon: Bell, label: 'Notifications' },
     {path:'/admindashboard', icon: LayoutDashboard, label: 'Admin Dashboard' },
     {path:'/mangeusers', icon: PeopleIcon, label: 'Manage Users' },
     {path:'/BooksManagement', icon: LibraryBig, label: 'Books Management' },
+    {path:'/report', icon: ChartBar , label: 'Reports' },
   ]
 
   const getLinkClass = ({ isActive }) =>
