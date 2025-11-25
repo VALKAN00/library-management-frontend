@@ -15,6 +15,7 @@ import ManageUser from './pages/ManageUser'
 import MyBorrowings from './pages/MyBorrowings'
 import MyReservations from './pages/MyResrvations'
 import BooksManagement from './pages/BooksMangement'
+import BorrowingManagement from './pages/BorrowingManagement'
 import './App.css'
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         <Route path="myborrowings" element={<MyBorrowings />} />
         <Route path="reservations" element={<MyReservations />} />
         <Route path="booksmanagement" element={<BooksManagement />} />
+        <Route path="borrowingmanagement" element={<BorrowingManagement />} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

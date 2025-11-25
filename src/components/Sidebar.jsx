@@ -13,6 +13,7 @@ function Sidebar() {
     {path:'/admindashboard', icon: LayoutDashboard, label: 'Admin Dashboard' },
     {path:'/mangeusers', icon: PeopleIcon, label: 'Manage Users' },
     {path:'/BooksManagement', icon: LibraryBig, label: 'Books Management' },
+    {path:'/BorrowingManagement', icon: LibraryBig, label: 'Borrowings' },
   ]
 
   const getLinkClass = ({ isActive }) =>

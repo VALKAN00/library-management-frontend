@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import {Pencil ,Trash} from 'lucide-react';
 import Person2Icon from '@mui/icons-material/Person2';
+import SearchIcon from '@mui/icons-material/Search';
 
 const columns = [
   { field: 'name', headerName: 'Name', flex: 1 ,
@@ -113,7 +114,7 @@ const rows = [
 
 
 
-export default function GradesTable() {
+export default function UsersTable() {
   return (
     <Box 
       className="bg-white p-4 rounded-lg shadow-lg w-full" 
@@ -123,6 +124,7 @@ export default function GradesTable() {
         overflow: 'auto'
       }}
     >
+        <button className='bg-gray-200 my-3 h-10 px-2 rounded'><div className='flex gap-2'><div> <SearchIcon /></div><div><input type="text" placeholder="Search users..." /></div></div></button>
       <DataGrid
         rows={rows}
         columns={columns }
