@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, BookOpen, Clock, Bell, LogOut, LibraryBig } from 'lucide-react'
+import PeopleIcon from '@mui/icons-material/People';
 
 function Sidebar() {
   const menuItems = [
@@ -8,6 +9,8 @@ function Sidebar() {
     { path: '/borrowings', icon: LibraryBig, label: 'My Borrowings' },
     { path: '/history', icon: Clock, label: 'History' },
     { path: '/notifications', icon: Bell, label: 'Notifications' },
+    {path:'/admindashboard', icon: LayoutDashboard, label: 'Admin Dashboard' },
+    {path:'/mangeusers', icon: PeopleIcon, label: 'Manage Users' },
   ]
 
   const getLinkClass = ({ isActive }) =>

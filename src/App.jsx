@@ -10,6 +10,8 @@ import Notifications from './pages/Notifications'
 import NotFound from './pages/NotFound'
 import LoginPage from './pages/LoginPage'
 import SignUPPage from './pages/SignUPPage'
+import AdminDashboard from './pages/AdminDashboard'
+import ManageUser from './pages/ManageUser'
 import './App.css'
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
         <Route path="borrowings" element={<Borrowings />} />
         <Route path="history" element={<History />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="admindashboard" element={<AdminDashboard />} />
+        <Route path="mangeusers" element={<ManageUser />} />
        
         <Route path="*" element={<NotFound />} />
       </Route>
