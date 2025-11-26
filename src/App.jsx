@@ -15,6 +15,7 @@ import MyReservations from './pages/MyResrvations'
 import BooksManagement from './pages/BooksMangement'
 import Report from './pages/Report'
 import ManageBorrow from './pages/ManageBorrow'
+import ManageReserve from './pages/ManageReserve'
 import './App.css'
 
 function App() {
@@ -36,7 +37,7 @@ function App() {
         <Route path="booksmanagement" element={<BooksManagement />} />
         <Route path="report" element={<Report />} />
         <Route path="manageborrow" element={<ManageBorrow />} />
-
+        <Route path="managereserve" element={<ManageReserve />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
