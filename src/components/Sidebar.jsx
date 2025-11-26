@@ -14,6 +14,7 @@ function Sidebar() {
     {path:'/BooksManagement', icon: LibraryBig, label: 'Books Management' },
     {path:'/report', icon: ChartBar , label: 'Reports' },
     {path:'/manageborrow', icon: LibraryBig, label: 'Manage Borrowing' },
+    {path:'/managereserve', icon: LibraryBig, label: 'Reservations' },
   ]
 
   const getLinkClass = ({ isActive }) =>
