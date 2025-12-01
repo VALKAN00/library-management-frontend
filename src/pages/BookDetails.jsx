@@ -1,28 +1,67 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Star, BookOpen, Bookmark, ArrowLeft } from 'lucide-react'
 import BorrowModal from '../components/BookDetails/BorrowModal'
 import ReservationModal from '../components/BookDetails/ReservationModal'
+import { booksAPI } from '../api/BooksApi'
 
 function BookDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false)
   const [isReservationModalOpen, setIsReservationModalOpen] = useState(false)
+  const [book, setBook] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  // Mock data - replace with actual API call
-  const book = {
-    id: id,
-    title: "The Midnight Library",
-    author: "Matt Haig",
-    category: "Fantasy Fiction",
-    published: "2020, Viking Press",
-    price: "$26.00",
-    rating: 4.8,
-    totalRatings: 1280,
-    status: "Available",
-    coverImage: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
-    synopsis: "Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived. To see how things would be if you had made other choices... Would you have done anything different, if you had the chance to undo your regrets?"
+  useEffect(() => {
+    fetchBookDetails()
+  }, [id])
+
+  const fetchBookDetails = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await booksAPI.getById(id)
+      setBook(response)
+    } catch (err) {
+      setError(err.message || 'Failed to fetch book details')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const defaultImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-8 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-xl text-gray-600">Loading book details...</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !book) {
+    return (
+      <div className="min-h-screen py-8 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-700 hover:text-indigo-600 mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-medium">Back to Books</span>
+          </button>
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error || 'Book not found'}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const handleBorrow = () => {
@@ -53,9 +92,14 @@ function BookDetails() {
               <div className="relative">
                 <div className="absolute inset-0 bg-linear-to-br from-gray-300 to-gray-600 rounded-2xl transform rotate-3"></div>
                 <img
-                  src={book.coverImage}
-                  alt={book.title}
+                  src={book.Cover || defaultImage}
+                  alt={book.Title}
                   className="relative w-full max-w-md h-auto rounded-2xl shadow-2xl object-cover"
+                  onError={(e) => {
+                    if (e.target.src !== defaultImage) {
+                      e.target.src = defaultImage
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -65,31 +109,27 @@ function BookDetails() {
               {/* Header */}
               <div className="mb-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h1 className="text-4xl font-bold text-gray-900">{book.title}</h1>
-                  {book.status === "Available" && (
+                  <h1 className="text-4xl font-bold text-gray-900">{book.Title}</h1>
+                  {book.Availability && (
                     <span className="px-4 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
                       Available
                     </span>
                   )}
+                  {!book.Availability && (
+                    <span className="px-4 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                      Unavailable
+                    </span>
+                  )}
                 </div>
-                <p className="text-xl text-indigo-600 font-medium mb-3">by {book.author}</p>
+                <p className="text-xl text-indigo-600 font-medium mb-3">by {book.Author}</p>
                 
                 {/* Rating */}
                 <div className="flex items-center gap-2 mb-6">
                   <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-5 h-5 ${
-                          i < Math.floor(book.rating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
+                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                   </div>
                   <span className="text-gray-700 font-medium">
-                    {book.rating} ({book.totalRatings.toLocaleString()} ratings)
+                    {book.Rating ? book.Rating.toFixed(1) : 'N/A'} / 5.0
                   </span>
                 </div>
               </div>
@@ -98,15 +138,23 @@ function BookDetails() {
               <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
                 <div className="flex justify-between">
                   <span className="text-gray-600 font-medium">Category</span>
-                  <span className="text-gray-900">{book.category}</span>
+                  <span className="text-gray-900">{book.Category}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 font-medium">Published</span>
-                  <span className="text-gray-900">{book.published}</span>
+                  <span className="text-gray-900">{book.Pub_Year}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 font-medium">Publisher</span>
+                  <span className="text-gray-900">{book.Pub_Name || 'Unknown'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 font-medium">Available Copies</span>
+                  <span className="text-gray-900">{book.Available_Copies ?? 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 font-medium">Price</span>
-                  <span className="text-gray-900 font-semibold">{book.price}</span>
+                  <span className="text-gray-900">{book.Price} <span className="text-green-800 text-xl">$</span></span>
                 </div>
               </div>
 
@@ -114,7 +162,7 @@ function BookDetails() {
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-3">Synopsis</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  {book.synopsis}
+                  {book.Description || 'No description available for this book.'}
                 </p>
               </div>
 
@@ -122,7 +170,7 @@ function BookDetails() {
               <div className="flex gap-4 mt-auto">
                 <button
                   onClick={handleBorrow}
-                  disabled={book.status !== "Available"}
+                  disabled={!book.Availability}
                   className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg disabled:cursor-not-allowed"
                 >
                   <BookOpen className="w-5 h-5" />
