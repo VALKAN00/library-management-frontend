@@ -1,9 +1,48 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import PersonIcon from '@mui/icons-material/Person';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LockIcon from '@mui/icons-material/Lock';
 import EmailIcon from '@mui/icons-material/Email';
-export function SignUpForm() {return (  
+import { authAPI } from '../../api/AuthApi'
+
+export function SignUpForm() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await authAPI.signup(formData);
+      // Navigate to login page after successful signup
+      navigate('/login');
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (  
     <div className="w-full max-w-md mx-auto ">
     {/* Header - Outside Card */}
       <div className="text-center mb-4 sm:mb-6 px-4 sm:px-0">
@@ -29,7 +68,14 @@ local_library
     <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mx-4 sm:mx-0">
       
       {/* Form */}
-      <form  className="space-y-4 sm:space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Name  Input */}
         <div className='flex gap-4'>
      <div className="w-full">
@@ -38,6 +84,9 @@ local_library
             <PersonIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
               placeholder="First Name"
               className="w-full pl-10 py-2.5 border border-gray-300 rounded-lg
                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
@@ -52,6 +101,9 @@ local_library
             <PersonIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
               placeholder="Last Name"
               className="w-full pl-10 py-2.5 border border-gray-300 rounded-lg
                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
@@ -68,6 +120,9 @@ local_library
           <AccountCircleIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
             placeholder="your_username"
             className="w-full pl-10 py-2.5 border border-gray-300 rounded-lg
                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
@@ -83,6 +138,9 @@ local_library
           <EmailIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             placeholder="example@mail.com"
             className="w-full pl-10 py-2.5 border border-gray-300 rounded-lg
                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
@@ -99,6 +157,9 @@ local_library
           <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             placeholder="••••••••"
             className="w-full pl-10 py-2.5 border border-gray-300 rounded-lg
                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
@@ -111,9 +172,10 @@ local_library
         {/* Login Button */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors mt-4 sm:mt-6 text-sm sm:text-base"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors mt-4 sm:mt-6 text-sm sm:text-base disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-         Create Account
+          {loading ? 'Creating Account...' : 'Create Account'}
         </button>
         <div className="text-center mt-4"><span className='text-gray-600'>Already have an account? </span><Link to="/login" className="text-blue-600 hover:underline">Sign in</Link></div>
       </form>

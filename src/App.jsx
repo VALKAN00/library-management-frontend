@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
 import UserDashboard from './pages/UserDashboard'
 import Books from './pages/Books'
@@ -19,12 +20,62 @@ import ManageReserve from './pages/ManageReserve'
 import FinePayment from './pages/FinePayment'
 import './App.css'
 
-function App() {
+// Protected Route Component
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+}
+
+// Public Route Component (redirect to home if already logged in)
+function PublicRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+}
+
+function AppRoutes() {
   return (
     <Routes>
-       <Route path="login" element={<LoginPage />} />
-       <Route path="signup" element={<SignUPPage />} />
-      <Route path="/" element={<Layout />}>
+      <Route path="login" element={
+        <PublicRoute>
+          <LoginPage />
+        </PublicRoute>
+      } />
+      <Route path="signup" element={
+        <PublicRoute>
+          <SignUPPage />
+        </PublicRoute>
+      } />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      }>
         <Route index element={<UserDashboard />} />
         <Route path="dashboard" element={<UserDashboard />} />
         <Route path="books" element={<Books />} />
@@ -43,6 +94,14 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   )
 }
 
