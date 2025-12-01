@@ -1,47 +1,72 @@
+import { useState, useEffect } from 'react'
+import { borrowingsAPI } from '../api/BorrowingsApi'
+import { booksAPI } from '../api/BooksApi'
+import RenewModal from '../components/myBorrowings/RenewModal'
+import ReturnModal from '../components/myBorrowings/ReturnModal'
+
 function MyBorrowings() {
-  // Mock data - replace with actual API call
-  const borrowings = [
-    {
-      id: 1,
-      bookTitle: "The Midnight Library",
-      author: "Matt Haig",
-      coverImage: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
-      borrowDate: "Apr 15, 2024",
-      dueDate: "May 15, 2024",
-      status: "overdue",
-      daysInfo: "Due in 3 days"
-    },
-    {
-      id: 2,
-      bookTitle: "Dune",
-      author: "Frank Herbert",
-      coverImage: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400",
-      borrowDate: "Apr 30, 2024",
-      dueDate: "May 30, 2024",
-      status: "active",
-      daysInfo: "Due in 15 days"
-    },
-    {
-      id: 3,
-      bookTitle: "The Name of the Wind",
-      author: "Patrick Rothfuss",
-      coverImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400",
-      borrowDate: "Apr 1, 2024",
-      dueDate: "May 1, 2024",
-      status: "overdue-severe",
-      daysInfo: "Overdue by 11 days"
-    },
-    {
-      id: 4,
-      bookTitle: "Sapiens: A Brief History of Humankind",
-      author: "Yuval Noah Harari",
-      coverImage: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=400",
-      borrowDate: "May 5, 2024",
-      dueDate: "June 5, 2024",
-      status: "active",
-      daysInfo: "Due in 24 days"
+  const [borrowings, setBorrowings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [renewModal, setRenewModal] = useState({ isOpen: false, borrowing: null })
+  const [returnModal, setReturnModal] = useState({ isOpen: false, borrowing: null })
+
+  useEffect(() => {
+    fetchMyBorrowings()
+  }, [])
+
+  const fetchMyBorrowings = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await borrowingsAPI.getMyBorrowings()
+      const borrowingsData = response.borrowings || []
+      
+      // Fetch book details for each borrowing
+      const borrowingsWithBooks = await Promise.all(
+        borrowingsData.map(async (borrowing) => {
+          try {
+            const bookData = await booksAPI.getById(borrowing.BookID)
+            return {
+              ...borrowing,
+              bookDetails: bookData
+            }
+          } catch (err) {
+            console.error(`Failed to fetch book ${borrowing.BookID}:`, err)
+            return {
+              ...borrowing,
+              bookDetails: null
+            }
+          }
+        })
+      )
+      
+      setBorrowings(borrowingsWithBooks)
+    } catch (err) {
+      setError(err.message || 'Failed to fetch borrowings')
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  const calculateDaysInfo = (dueDate, returnDate) => {
+    if (returnDate) return null
+    
+    const due = new Date(dueDate)
+    const today = new Date()
+    const diffTime = due - today
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays < 0) {
+      return { status: 'overdue-severe', text: `Overdue by ${Math.abs(diffDays)} days` }
+    } else if (diffDays <= 3) {
+      return { status: 'overdue', text: `Due in ${diffDays} days` }
+    } else {
+      return { status: 'active', text: `Due in ${diffDays} days` }
+    }
+  }
+
+  const defaultImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='
 
   const getStatusBadge = (status, daysInfo) => {
     if (status === "overdue") {
@@ -68,21 +93,63 @@ function MyBorrowings() {
     }
   }
 
-  const getActionButton = (status) => {
-    if (status === "overdue-severe") {
-      return (
-        <button
-          disabled
-          className="px-6 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-lg cursor-not-allowed"
-        >
-          Renew Unavailable
-        </button>
-      )
+  const openRenewModal = (borrowing) => {
+    setRenewModal({ isOpen: true, borrowing })
+  }
+
+  const closeRenewModal = () => {
+    setRenewModal({ isOpen: false, borrowing: null })
+  }
+
+  const openReturnModal = (borrowing) => {
+    setReturnModal({ isOpen: true, borrowing })
+  }
+
+  const closeReturnModal = () => {
+    setReturnModal({ isOpen: false, borrowing: null })
+  }
+
+  const handleConfirmRenew = async () => {
+    try {
+      await borrowingsAPI.renewBook(renewModal.borrowing.BorrowID)
+      // Refresh the borrowings list
+      await fetchMyBorrowings()
+    } catch (err) {
+      closeRenewModal()
+      alert(err.message || 'Failed to renew book')
+      throw err
     }
+  }
+
+  const handleConfirmReturn = async () => {
+    try {
+      await borrowingsAPI.returnBook(returnModal.borrowing.BorrowID)
+      // Refresh the borrowings list
+      await fetchMyBorrowings()
+    } catch (err) {
+      closeReturnModal()
+      alert(err.message || 'Failed to return book')
+      throw err
+    }
+  }
+
+  const getActionButtons = (borrowing, status) => {
     return (
-      <button className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg">
-        Renew Book
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={() => openRenewModal(borrowing)}
+          disabled={status === "overdue-severe"}
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg text-sm"
+        >
+          Renew
+        </button>
+        <button
+          onClick={() => openReturnModal(borrowing)}
+          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg text-sm"
+        >
+          Return
+        </button>
+      </div>
     )
   }
 
@@ -117,77 +184,135 @@ function MyBorrowings() {
 
             {/* Table Body */}
             <tbody className="divide-y divide-gray-200">
-              {borrowings.map((borrowing) => (
-                <tr key={borrowing.id} className="hover:bg-gray-50 transition-colors">
-                  {/* Book Info */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={borrowing.coverImage}
-                        alt={borrowing.bookTitle}
-                        className="w-12 h-16 object-cover rounded-lg shadow-md"
-                      />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 mb-1">
-                          {borrowing.bookTitle}
-                        </h3>
-                        <p className="text-sm text-gray-600">{borrowing.author}</p>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Borrow Date */}
-                  <td className="px-6 py-4">
-                    <span className="text-gray-700">{borrowing.borrowDate}</span>
-                  </td>
-
-                  {/* Due Date */}
-                  <td className="px-6 py-4">
-                    <span className="text-gray-700">{borrowing.dueDate}</span>
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-6 py-4">
-                    {getStatusBadge(borrowing.status, borrowing.daysInfo)}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4">
-                    {getActionButton(borrowing.status)}
+              {loading ? (
+                <tr key="loading">
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-600">
+                    Loading borrowings...
                   </td>
                 </tr>
-              ))}
+              ) : error ? (
+                <tr key="error">
+                  <td colSpan="5" className="px-6 py-12">
+                    <div className="text-center text-red-600">{error}</div>
+                  </td>
+                </tr>
+              ) : borrowings.length === 0 ? (
+                <tr key="empty">
+                  <td colSpan="5" className="px-6 py-12">
+                    <div className="text-center">
+                      <div className="text-gray-400 mb-4">
+                        <svg
+                          className="mx-auto h-24 w-24"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No Borrowings Yet
+                      </h3>
+                      <p className="text-gray-600">
+                        You haven't borrowed any books yet. Start exploring our collection!
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                borrowings.map((borrowing) => {
+                  const daysInfo = calculateDaysInfo(borrowing.DueDate, borrowing.ReturnDate)
+                  const book = borrowing.bookDetails
+                  
+                  return (
+                    <tr key={borrowing.BorrowID} className="hover:bg-gray-50 transition-colors">
+                      {/* Book Info */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={book?.Cover || defaultImage}
+                            alt={book?.Title || 'Book'}
+                            className="w-12 h-16 object-cover rounded-lg shadow-md"
+                            onError={(e) => {
+                              if (e.target.src !== defaultImage) {
+                                e.target.src = defaultImage
+                              }
+                            }}
+                          />
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-1">
+                              {book?.Title || 'Loading...'}
+                            </h3>
+                            <p className="text-sm text-gray-600">{book?.Author || ''}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Borrow Date */}
+                      <td className="px-6 py-4">
+                        <span className="text-gray-700">
+                          {new Date(borrowing.BorrowDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </td>
+
+                      {/* Due Date */}
+                      <td className="px-6 py-4">
+                        <span className="text-gray-700">
+                          {new Date(borrowing.DueDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-6 py-4">
+                        {daysInfo ? getStatusBadge(daysInfo.status, daysInfo.text) : (
+                          <span className="px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                            Returned
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4">
+                        {daysInfo ? getActionButtons(borrowing, daysInfo.status) : (
+                          <span className="text-gray-500 text-sm">Completed</span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Empty State (if no borrowings) */}
-      {borrowings.length === 0 && (
-        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-          <div className="text-gray-400 mb-4">
-            <svg
-              className="mx-auto h-24 w-24"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            No Borrowings Yet
-          </h3>
-          <p className="text-gray-600">
-            You haven't borrowed any books yet. Start exploring our collection!
-          </p>
-        </div>
-      )}
+      {/* Modals */}
+      <RenewModal
+        isOpen={renewModal.isOpen}
+        onClose={closeRenewModal}
+        onConfirm={handleConfirmRenew}
+        book={renewModal.borrowing?.bookDetails}
+      />
+
+      <ReturnModal
+        isOpen={returnModal.isOpen}
+        onClose={closeReturnModal}
+        onConfirm={handleConfirmReturn}
+        book={returnModal.borrowing?.bookDetails}
+      />
     </div>
   )
 }
