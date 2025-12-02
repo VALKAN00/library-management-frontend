@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, Clock, ChartBar, LogOut, LibraryBig } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Clock, ChartBar, LogOut, LibraryBig, DollarSign } from 'lucide-react'
 import PeopleIcon from '@mui/icons-material/People';
 
 function Sidebar() {
@@ -8,6 +8,7 @@ function Sidebar() {
     { path: '/books', icon: BookOpen, label: 'Browse Books' },
     { path: '/myborrowings', icon: LibraryBig, label: 'My Borrowings' },
     { path: '/reservations', icon: LibraryBig, label: 'My Reservations' },
+    { path: '/myfines', icon: DollarSign, label: 'My Fines' },
     { path: '/history', icon: Clock, label: 'History' },
     {path:'/admindashboard', icon: LayoutDashboard, label: 'Admin Dashboard' },
     {path:'/mangeusers', icon: PeopleIcon, label: 'Manage Users' },

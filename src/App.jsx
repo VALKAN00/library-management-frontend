@@ -19,6 +19,7 @@ import Report from './pages/Report'
 import ManageBorrow from './pages/ManageBorrow'
 import ManageReserve from './pages/ManageReserve'
 import FinePayment from './pages/FinePayment'
+import MyFines from './pages/MyFines'
 import './App.css'
 
 // Protected Route Component
@@ -94,6 +95,7 @@ function AppRoutes() {
         <Route path="manageborrow" element={<ManageBorrow />} />
         <Route path="managereserve" element={<ManageReserve />} />
         <Route path="finepayment" element={<FinePayment />} />
+        <Route path="myfines" element={<MyFines />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
