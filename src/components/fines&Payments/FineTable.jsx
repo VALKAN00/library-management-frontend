@@ -1,10 +1,12 @@
 //FineTable
 
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import PaymentIcon from '@mui/icons-material/Payment';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import SearchIcon from '@mui/icons-material/Search';
+import { booksAPI } from '../../api/BooksApi';
 
 const columns = [
   { 
@@ -88,66 +90,164 @@ const columns = [
   }
 ];
 
-const rows = [
-  {
-    id: 1,
-    user: "David Green",
-    bookTitle: "Project Hail Mary",
-    fineAmount: "$12.50",
-    reason: "Overdue Return",
-    status: "Outstanding",
-  },
-  {
-    id: 2,
-    user: "Laura Palmer",
-    bookTitle: "The Silent Patient",
-    fineAmount: "$5.00",
-    reason: "Damaged Book",
-    status: "Outstanding",
-  },
-  {
-    id: 3,
-    user: "Mark Johnson",
-    bookTitle: "Dune",
-    fineAmount: "$8.75",
-    reason: "Overdue Return",
-    status: "Paid",
-  },
-  {
-    id: 4,
-    user: "Samantha Ray",
-    bookTitle: "The Vanishing Half",
-    fineAmount: "$25.00",
-    reason: "Lost Book",
-    status: "Outstanding",
-  },
-  {
-    id: 5,
-    user: "Kevin Hart",
-    bookTitle: "Becoming",
-    fineAmount: "$3.50",
-    reason: "Overdue Return",
-    status: "Paid",
-  },
-];
+export default function FineTable({ fines = [], loading, error, isAdmin, onPayFine, onWaiveFine }) {
+  const [rowsWithBooks, setRowsWithBooks] = useState([])
+  const [loadingBooks, setLoadingBooks] = useState(true)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [waiveModalOpen, setWaiveModalOpen] = useState(false)
+  const [selectedFine, setSelectedFine] = useState(null)
 
+  useEffect(() => {
+    fetchBooksDetails()
+  }, [fines])
 
+  const fetchBooksDetails = async () => {
+    setLoadingBooks(true)
+    try {
+      const rowsWithBooksData = await Promise.all(
+        fines.map(async (fine) => {
+          try {
+            const bookData = await booksAPI.getById(fine.BookID)
+            return {
+              id: fine.FineID,
+              user: `User ${fine.UserID}`,
+              bookTitle: bookData.Title || 'Unknown Book',
+              fineAmount: `$${parseFloat(fine.Amount || 0).toFixed(2)}`,
+              reason: fine.Reason || 'N/A',
+              daysOverdue: fine.DaysOverdue || 0,
+              status: fine.Status === 'paid' ? 'Paid' : fine.Status === 'waived' ? 'Waived' : 'Outstanding',
+              rawFine: fine
+            }
+          } catch (err) {
+            console.error(`Failed to fetch book ${fine.BookID}:`, err)
+            return {
+              id: fine.FineID,
+              user: `User ${fine.UserID}`,
+              bookTitle: 'Unknown Book',
+              fineAmount: `$${parseFloat(fine.Amount || 0).toFixed(2)}`,
+              reason: fine.Reason || 'N/A',
+              daysOverdue: fine.DaysOverdue || 0,
+              status: fine.Status === 'paid' ? 'Paid' : fine.Status === 'waived' ? 'Waived' : 'Outstanding',
+              rawFine: fine
+            }
+          }
+        })
+      )
+      setRowsWithBooks(rowsWithBooksData)
+    } catch (err) {
+      console.error("Error fetching books details:", err)
+    } finally {
+      setLoadingBooks(false)
+    }
+  }
 
+  const handlePayClick = (fine) => {
+    setSelectedFine(fine.rawFine)
+    setPaymentModalOpen(true)
+  }
 
+  const handleWaiveClick = (fine) => {
+    setSelectedFine(fine.rawFine)
+    setWaiveModalOpen(true)
+  }
 
-export default function FineTable() {
+  const handleConfirmPayment = async (paymentMethod) => {
+    try {
+      await onPayFine(selectedFine.FineID, paymentMethod)
+      setPaymentModalOpen(false)
+      setSelectedFine(null)
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to process payment')
+    }
+  }
+
+  const handleConfirmWaive = async (reason) => {
+    try {
+      await onWaiveFine(selectedFine.FineID, reason)
+      setWaiveModalOpen(false)
+      setSelectedFine(null)
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to waive fine')
+    }
+  }
+
+  const columnsWithActions = [
+    ...columns.filter(col => col.field !== 'actions'),
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1.8,
+      minWidth: 220,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => {
+        const status = params.row.status;
+        
+        if (status === 'Paid' || status === 'Waived') {
+          return <span className="text-gray-500 text-sm">
+            {status === 'Paid' ? 'Cleared' : 'Waived'}
+          </span>;
+        }
+
+        return (
+          <div className="flex gap-2 items-center">
+            <button 
+              onClick={() => handlePayClick(params.row)}
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+              title="Record Payment"
+            >
+              <PaymentIcon sx={{ fontSize: 18 }} />
+              Pay
+            </button>
+            {isAdmin && (
+              <button 
+                onClick={() => handleWaiveClick(params.row)}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                title="Waive"
+              >
+                <MoneyOffIcon sx={{ fontSize: 18 }} />
+                Waive
+              </button>
+            )}
+          </div>
+        );
+      },
+    }
+  ];
+
+  if (loading || loadingBooks) {
+    return (
+      <Box className="bg-white p-6 rounded-lg shadow w-full">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600"></div>
+        </div>
+      </Box>
+    )
+  }
+
+  if (error) {
+    return (
+      <Box className="bg-white p-6 rounded-lg shadow w-full">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      </Box>
+    )
+  }
+
   return (
-    <Box 
-      className="bg-white p-6 rounded-lg shadow w-full" 
-      sx={{ 
-        height: { xs: 500, sm: 450, md: 580 },
-        width: '100%',
-        overflow: 'auto'
-      }}
-    >
-      <div className='flex justify-between items-center mb-4'>
-        <div>
-          <h1 className='text-xl font-semibold text-gray-800'>All Fines</h1>
+    <>
+      <Box 
+        className="bg-white p-6 rounded-lg shadow w-full" 
+        sx={{ 
+          height: { xs: 500, sm: 450, md: 580 },
+          width: '100%',
+          overflow: 'auto'
+        }}
+      >
+        <div className='flex justify-between items-center mb-4'>
+          <div>
+            <h1 className='text-xl font-semibold text-gray-800'>All Fines</h1>
         </div>
         <div className='flex gap-2'>
           <div className='flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-2'>
@@ -162,8 +262,8 @@ export default function FineTable() {
       </div>
        
       <DataGrid
-        rows={rows}
-        columns={columns}
+        rows={rowsWithBooks}
+        columns={columnsWithActions}
         initialState={{
           pagination: {
             paginationModel: {
@@ -215,6 +315,91 @@ export default function FineTable() {
         pageSizeOptions={[5]}
         disableRowSelectionOnClick
       />
-    </Box>
+      </Box>
+
+      {/* Payment Modal */}
+      {paymentModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">Record Payment</h2>
+            <p className="text-gray-600 mb-4">
+              Fine Amount: <span className="font-semibold">${parseFloat(selectedFine?.Amount || 0).toFixed(2)}</span>
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Payment Method
+              </label>
+              <select
+                id="paymentMethod"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                defaultValue="Cash"
+              >
+                <option value="Cash">Cash</option>
+                <option value="Credit Card">Credit Card</option>
+                <option value="Debit Card">Debit Card</option>
+                <option value="Online Transfer">Online Transfer</option>
+              </select>
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setPaymentModalOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const paymentMethod = document.getElementById('paymentMethod').value;
+                  handleConfirmPayment(paymentMethod);
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                Confirm Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Waive Modal */}
+      {waiveModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">Waive Fine</h2>
+            <p className="text-gray-600 mb-4">
+              Fine Amount: <span className="font-semibold">${parseFloat(selectedFine?.Amount || 0).toFixed(2)}</span>
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason (Optional)
+              </label>
+              <textarea
+                id="waiveReason"
+                rows="3"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                placeholder="Enter reason for waiving fine..."
+              />
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setWaiveModalOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const reason = document.getElementById('waiveReason').value;
+                  handleConfirmWaive(reason);
+                }}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              >
+                Confirm Waive
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
