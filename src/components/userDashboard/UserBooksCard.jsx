@@ -1,6 +1,19 @@
-export default function UserBooksCard({title, author, genre, date, due, reservationDate}) {
+import { useNavigate } from 'react-router-dom'
+
+export default function UserBooksCard({bookId, title, author, genre, date, due, reservationDate}) {
+    const navigate = useNavigate()
+
+    const handleClick = () => {
+        if (bookId) {
+            navigate(`/books/${bookId}`)
+        }
+    }
+
     return (
-        <div className="bg-white flex justify-start shadow-md rounded-lg p-6 gap-4">
+        <div 
+            className="bg-white flex justify-start shadow-md rounded-lg p-6 gap-4 cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={handleClick}
+        >
             <div className="book-image w-35 h-45 bg-gray-200 rounded-md flex items-center justify-center">
                     <span className="text-gray-500">Book Image</span>     
             </div>

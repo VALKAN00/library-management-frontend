@@ -1,47 +1,126 @@
+import { useState, useEffect } from 'react'
+import { reservationsAPI } from '../api/ReservationsApi'
+import { booksAPI } from '../api/BooksApi'
+import CancelReservationModal from '../components/myReservations/CancleReservationModal'
+import PickupReservationModal from '../components/myReservations/PickupReservationModal'
+
 function MyReservations() {
-  // Mock data - replace with actual API call
-  const reservations = [
-    {
-      id: 1,
-      bookTitle: "The Midnight Library",
-      author: "Matt Haig",
-      coverImage: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
-      reservationDate: "Nov 20, 2025",
-      expiryDate: "Nov 27, 2025",
-      status: "active",
-      daysInfo: "Expires in 2 days"
-    },
-    {
-      id: 2,
-      bookTitle: "Dune",
-      author: "Frank Herbert",
-      coverImage: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400",
-      reservationDate: "Nov 22, 2025",
-      expiryDate: "Nov 29, 2025",
-      status: "active",
-      daysInfo: "Expires in 4 days"
-    },
-    {
-      id: 3,
-      bookTitle: "The Name of the Wind",
-      author: "Patrick Rothfuss",
-      coverImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400",
-      reservationDate: "Nov 15, 2025",
-      expiryDate: "Nov 22, 2025",
-      status: "expired",
-      daysInfo: "Expired 3 days ago"
-    },
-    {
-      id: 4,
-      bookTitle: "Sapiens: A Brief History of Humankind",
-      author: "Yuval Noah Harari",
-      coverImage: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=400",
-      reservationDate: "Nov 23, 2025",
-      expiryDate: "Nov 30, 2025",
-      status: "ready",
-      daysInfo: "Ready for pickup"
+  const [reservations, setReservations] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [cancelModal, setCancelModal] = useState({ isOpen: false, reservation: null })
+  const [pickupModal, setPickupModal] = useState({ isOpen: false, reservation: null })
+
+  useEffect(() => {
+    fetchMyReservations()
+  }, [])
+
+  const fetchMyReservations = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await reservationsAPI.getMyReservations()
+      const reservationsData = response.reservations || []
+      
+      // Fetch book details for each reservation
+      const reservationsWithBooks = await Promise.all(
+        reservationsData.map(async (reservation) => {
+          try {
+            const bookData = await booksAPI.getById(reservation.BookID)
+            return {
+              ...reservation,
+              bookDetails: bookData
+            }
+          } catch (err) {
+            console.error(`Failed to fetch book ${reservation.BookID}:`, err)
+            return {
+              ...reservation,
+              bookDetails: null
+            }
+          }
+        })
+      )
+      
+      setReservations(reservationsWithBooks)
+    } catch (err) {
+      setError(err.message || 'Failed to fetch reservations')
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  const calculateStatusInfo = (reservation) => {
+    // If reservation is cancelled or completed
+    if (reservation.Status === 'Cancelled') {
+      return { status: 'expired', text: 'Cancelled' }
+    }
+    if (reservation.Status === 'Completed') {
+      return { status: 'ready', text: 'Completed' }
+    }
+    if (reservation.Status === 'Ready') {
+      return { status: 'ready', text: 'Ready for pickup' }
+    }
+    
+    // Calculate expiry info for active reservations
+    if (reservation.ExpiryDate) {
+      const expiry = new Date(reservation.ExpiryDate)
+      const today = new Date()
+      const diffTime = expiry - today
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      
+      if (diffDays < 0) {
+        return { status: 'expired', text: `Expired ${Math.abs(diffDays)} days ago` }
+      } else if (diffDays <= 2) {
+        return { status: 'active', text: `Expires in ${diffDays} days` }
+      } else {
+        return { status: 'active', text: `Expires in ${diffDays} days` }
+      }
+    }
+    
+    return { status: 'active', text: 'Active' }
+  }
+
+  const defaultImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='
+
+  const openCancelModal = (reservation) => {
+    setCancelModal({ isOpen: true, reservation })
+  }
+
+  const closeCancelModal = () => {
+    setCancelModal({ isOpen: false, reservation: null })
+  }
+
+  const openPickupModal = (reservation) => {
+    setPickupModal({ isOpen: true, reservation })
+  }
+
+  const closePickupModal = () => {
+    setPickupModal({ isOpen: false, reservation: null })
+  }
+
+  const handleConfirmCancel = async () => {
+    try {
+      await reservationsAPI.cancel(cancelModal.reservation.ReservationID)
+      // Refresh the reservations list
+      await fetchMyReservations()
+    } catch (err) {
+      closeCancelModal()
+      alert(err.message || 'Failed to cancel reservation')
+      throw err
+    }
+  }
+
+  const handleConfirmPickup = async () => {
+    try {
+      await reservationsAPI.pickup(pickupModal.reservation.ReservationID)
+      // Refresh the reservations list
+      await fetchMyReservations()
+    } catch (err) {
+      closePickupModal()
+      alert(err.message || 'Failed to pickup reservation')
+      throw err
+    }
+  }
 
   const getStatusBadge = (status, daysInfo) => {
     if (status === "expired") {
@@ -68,7 +147,7 @@ function MyReservations() {
     }
   }
 
-  const getActionButton = (status) => {
+  const getActionButtons = (reservation, status) => {
     if (status === "expired") {
       return (
         <button
@@ -80,13 +159,27 @@ function MyReservations() {
       )
     } else if (status === "ready") {
       return (
-        <button className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg">
-          Pickup Book
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => openPickupModal(reservation)}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg text-sm"
+          >
+            Pickup
+          </button>
+          <button 
+            onClick={() => openCancelModal(reservation)}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg text-sm"
+          >
+            Cancel
+          </button>
+        </div>
       )
     }
     return (
-      <button className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg">
+      <button 
+        onClick={() => openCancelModal(reservation)}
+        className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
+      >
         Cancel Reservation
       </button>
     )
@@ -123,77 +216,129 @@ function MyReservations() {
 
             {/* Table Body */}
             <tbody className="divide-y divide-gray-200">
-              {reservations.map((reservation) => (
-                <tr key={reservation.id} className="hover:bg-gray-50 transition-colors">
-                  {/* Book Info */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={reservation.coverImage}
-                        alt={reservation.bookTitle}
-                        className="w-12 h-16 object-cover rounded-lg shadow-md"
-                      />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 mb-1">
-                          {reservation.bookTitle}
-                        </h3>
-                        <p className="text-sm text-gray-600">{reservation.author}</p>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Reservation Date */}
-                  <td className="px-6 py-4">
-                    <span className="text-gray-700">{reservation.reservationDate}</span>
-                  </td>
-
-                  {/* Expiry Date */}
-                  <td className="px-6 py-4">
-                    <span className="text-gray-700">{reservation.expiryDate}</span>
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-6 py-4">
-                    {getStatusBadge(reservation.status, reservation.daysInfo)}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4">
-                    {getActionButton(reservation.status)}
+              {loading ? (
+                <tr key="loading">
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-600">
+                    Loading reservations...
                   </td>
                 </tr>
-              ))}
+              ) : error ? (
+                <tr key="error">
+                  <td colSpan="5" className="px-6 py-12">
+                    <div className="text-center text-red-600">{error}</div>
+                  </td>
+                </tr>
+              ) : reservations.length === 0 ? (
+                <tr key="empty">
+                  <td colSpan="5" className="px-6 py-12">
+                    <div className="text-center">
+                      <div className="text-gray-400 mb-4">
+                        <svg
+                          className="mx-auto h-24 w-24"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No Reservations Yet
+                      </h3>
+                      <p className="text-gray-600">
+                        You haven't reserved any books yet. Start exploring our collection!
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                reservations.map((reservation) => {
+                  const statusInfo = calculateStatusInfo(reservation)
+                  const book = reservation.bookDetails
+                  
+                  return (
+                    <tr key={reservation.ReservationID} className="hover:bg-gray-50 transition-colors">
+                      {/* Book Info */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={book?.Cover || defaultImage}
+                            alt={book?.Title || 'Book'}
+                            className="w-12 h-16 object-cover rounded-lg shadow-md"
+                            onError={(e) => {
+                              if (e.target.src !== defaultImage) {
+                                e.target.src = defaultImage
+                              }
+                            }}
+                          />
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-1">
+                              {book?.Title || 'Loading...'}
+                            </h3>
+                            <p className="text-sm text-gray-600">{book?.Author || ''}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Reservation Date */}
+                      <td className="px-6 py-4">
+                        <span className="text-gray-700">
+                          {new Date(reservation.ReservationDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </td>
+
+                      {/* Expiry Date */}
+                      <td className="px-6 py-4">
+                        <span className="text-gray-700">
+                          {reservation.ExpiryDate ? new Date(reservation.ExpiryDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          }) : 'N/A'}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-6 py-4">
+                        {getStatusBadge(statusInfo.status, statusInfo.text)}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4">
+                        {getActionButtons(reservation, statusInfo.status)}
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Empty State (if no reservations) */}
-      {reservations.length === 0 && (
-        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-          <div className="text-gray-400 mb-4">
-            <svg
-              className="mx-auto h-24 w-24"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            No Reservations Yet
-          </h3>
-          <p className="text-gray-600">
-            You haven't reserved any books yet. Start exploring our collection!
-          </p>
-        </div>
-      )}
+      {/* Modals */}
+      <CancelReservationModal
+        isOpen={cancelModal.isOpen}
+        onClose={closeCancelModal}
+        onConfirm={handleConfirmCancel}
+        book={cancelModal.reservation?.bookDetails}
+      />
+
+      <PickupReservationModal
+        isOpen={pickupModal.isOpen}
+        onClose={closePickupModal}
+        onConfirm={handleConfirmPickup}
+        book={pickupModal.reservation?.bookDetails}
+      />
     </div>
   )
 }
