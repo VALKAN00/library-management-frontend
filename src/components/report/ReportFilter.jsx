@@ -1,6 +1,6 @@
 import { Search, Download } from "lucide-react"
 
-function ReportFilter({ reportType, setReportType, dateFrom, setDateFrom, dateTo, setDateTo, onGenerate, onExport }) {
+function ReportFilter({ reportType, setReportType, onGenerate, onExport }) {
   const reportTypes = [
     { value: "popular-books", label: "Popular Books" },
     { value: "all-borrowings", label: "All Borrowings" },
@@ -28,31 +28,6 @@ function ReportFilter({ reportType, setReportType, dateFrom, setDateFrom, dateTo
           </select>
         </div>
 
-        {/* Date From */}
-        <div>
-          <label className="block text-gray-700 text-sm font-semibold mb-2">
-            Date Range
-          </label>
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Date To */}
-        <div>
-          <label className="block text-gray-700 text-sm font-semibold mb-2">
-            To
-          </label>
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          />
-        </div>
 
         {/* Action Buttons */}
         <div className="flex gap-3">

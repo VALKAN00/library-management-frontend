@@ -1,9 +1,15 @@
 function AllReservationsReport({ data, dateRange }) {
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  }
+
   const getStatusBadge = (status) => {
-    if (status === "active") {
+    if (status === "reserved") {
       return (
         <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-          Active
+          Reserved
         </span>
       )
     } else if (status === "picked-up") {
@@ -62,24 +68,24 @@ function AllReservationsReport({ data, dateRange }) {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {data.map((reservation) => (
-              <tr key={reservation.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={reservation.ReservationID} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
-                  <span className="text-gray-900 font-semibold">{reservation.memberName}</span>
+                  <span className="text-gray-900 font-semibold">{reservation.CusID || 'N/A'}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{reservation.bookTitle}</span>
+                  <span className="text-gray-700">{reservation.BookID || 'N/A'}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{reservation.author}</span>
+                  <span className="text-gray-700">-</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{reservation.reservationDate}</span>
+                  <span className="text-gray-700">{formatDate(reservation.ReservationDate)}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{reservation.expiryDate}</span>
+                  <span className="text-gray-700">{formatDate(reservation.ReservationExpiryDate)}</span>
                 </td>
                 <td className="px-6 py-4">
-                  {getStatusBadge(reservation.status)}
+                  {getStatusBadge(reservation.Status)}
                 </td>
               </tr>
             ))}
