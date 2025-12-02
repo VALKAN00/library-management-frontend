@@ -34,25 +34,25 @@ function MemberActivityReport({ data, dateRange }) {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {data.map((member) => (
-              <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={member.CusID} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
-                  <span className="text-gray-900 font-semibold">{member.name}</span>
+                  <span className="text-gray-900 font-semibold">{member.CusID || 'N/A'}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{member.email}</span>
+                  <span className="text-gray-700">-</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-900 font-semibold">{member.totalBorrowings}</span>
+                  <span className="text-gray-900 font-semibold">{member.borrow_count}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-blue-600 font-semibold">{member.activeBorrowings}</span>
+                  <span className="text-blue-600 font-semibold">-</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-900 font-semibold">{member.totalReservations}</span>
+                  <span className="text-gray-900 font-semibold">-</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`font-semibold ${member.overdueBooks > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    {member.overdueBooks}
+                  <span className="text-green-600 font-semibold">
+                    0
                   </span>
                 </td>
               </tr>

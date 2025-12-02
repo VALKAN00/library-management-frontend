@@ -31,21 +31,21 @@ function PopularBooksReport({ data, dateRange }) {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {data.map((book, index) => (
-              <tr key={book.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={book.BookID} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
                   <span className="text-2xl font-bold text-indigo-600">{index + 1}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-900 font-semibold">{book.title}</span>
+                  <span className="text-gray-900 font-semibold">{book.Title}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{book.author}</span>
+                  <span className="text-gray-700">{book.Author}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{book.genre}</span>
+                  <span className="text-gray-700">{book.Genre || 'N/A'}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-900 font-bold text-lg">{book.totalBorrows}</span>
+                  <span className="text-gray-900 font-bold text-lg">{book.times}</span>
                 </td>
               </tr>
             ))}
