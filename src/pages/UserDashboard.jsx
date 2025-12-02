@@ -147,6 +147,7 @@ export default function UserDashboard() {
                 genre={book?.Category || ''}
                 date={book?.Pub_Year || ''}
                 due={borrowing.ReturnDate ? 'Returned' : calculateDaysUntilDue(borrowing.DueDate)}
+                BookCover={book?.Cover}
               />
             )
           })}
@@ -170,6 +171,7 @@ export default function UserDashboard() {
                 author={book?.Author || ''}
                 genre={book?.Category || ''}
                 date={book?.Pub_Year || ''}
+                BookCover={book?.Cover}
                 reservationDate={new Date(reservation.ReservationDate).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'short',

@@ -29,7 +29,7 @@ function UserHistory() {
                 ...borrowing,
                 bookTitle: bookResponse.Title,
                 author: bookResponse.Author,
-                coverImage: bookResponse.Image
+                coverImage: bookResponse.BookCover
               }
             } catch (err) {
               console.error(`Error fetching book ${borrowing.BookID}:`, err)
@@ -58,7 +58,7 @@ function UserHistory() {
                 ...reservation,
                 bookTitle: bookResponse.Title,
                 author: bookResponse.Author,
-                coverImage: bookResponse.Image
+                coverImage: bookResponse.BookCover
               }
             } catch (err) {
               console.error(`Error fetching book ${reservation.BookID}:`, err)
@@ -241,7 +241,7 @@ function UserHistory() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
                           <img
-                            src={record.coverImage || defaultImage}
+                            src={record.BookCover || defaultImage}
                             alt={record.bookTitle}
                             className="w-12 h-16 object-cover rounded-lg shadow-md"
                             onError={(e) => {
@@ -335,7 +335,7 @@ function UserHistory() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <img
-                          src={record.coverImage || defaultImage}
+                          src={record.BookCover || defaultImage}
                           alt={record.bookTitle}
                           className="w-12 h-16 object-cover rounded-lg shadow-md"
                           onError={(e) => {

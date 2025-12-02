@@ -1,51 +1,76 @@
 import * as React from 'react';
-import { useState, useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
+import { booksAPI } from '../../api/BooksApi';
 
-// Initial exam schedule data
-const initialRows = [
- 
-  
-   {
-    id: 1,
-    title: "The Midnight Library",
-    member: "John Smith",
-    borrowDate: "2023-10-15",
-    dueDate: "2023-11-05",
-    status: "Returned"
-  },
-   {
-    id: 2,
-    title: "Atomic Habits",
-    member: "Emily White",
-    borrowDate: "2023-10-28",
-    dueDate: "2023-11-18",
-    status: "Borrowed"
-  },
-  {
-    id: 3,
-    title: "Project Hail Mary",
-    member: "David Green",
-    borrowDate: "2023-10-01",
-    dueDate: "2023-10-22",
-    status: "Overdue"
-  },
-   {
-    id: 4   ,
-    title: "Klara and the Sun",
-    member: "Sarah Johnson",
-    borrowDate: "2023-10-30",
-    dueDate: "2023-11-20",
-    status: "Borrowed"
+export default function BorrowingsTable({ borrowings = [] }) {
+  const navigate = useNavigate()
+  const [rowsWithBooks, setRowsWithBooks] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchBooksDetails()
+  }, [borrowings])
+
+  const fetchBooksDetails = async () => {
+    setLoading(true)
+    try {
+      const rowsWithBooksData = await Promise.all(
+        borrowings.map(async (borrowing) => {
+          try {
+            const bookData = await booksAPI.getById(borrowing.BookID)
+            return {
+              id: borrowing.BorrowID,
+              title: bookData.Title || 'Unknown',
+              member: `User ${borrowing.CusID}`,
+              borrowDate: formatDate(borrowing.BorrowDate),
+              dueDate: formatDate(borrowing.DueDate),
+              status: getStatus(borrowing)
+            }
+          } catch (err) {
+            console.error(`Failed to fetch book ${borrowing.BookID}:`, err)
+            return {
+              id: borrowing.BorrowID,
+              title: 'Unknown Book',
+              member: `User ${borrowing.CusID}`,
+              borrowDate: formatDate(borrowing.BorrowDate),
+              dueDate: formatDate(borrowing.DueDate),
+              status: getStatus(borrowing)
+            }
+          }
+        })
+      )
+      setRowsWithBooks(rowsWithBooksData)
+    } catch (err) {
+      console.error("Error fetching books details:", err)
+    } finally {
+      setLoading(false)
+    }
   }
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+  }
 
-];
-
-export default function BorrowingsTable() {
-  // State for managing rows
-  const [rows, setRows] = useState(initialRows);
+  const getStatus = (borrowing) => {
+    if (borrowing.ReturnDate || borrowing.Status === 'returned') {
+      return 'Returned'
+    }
+    const today = new Date()
+    const dueDate = new Date(borrowing.DueDate)
+    if (today > dueDate) {
+      return 'Overdue'
+    }
+    return 'Borrowed'
+  }
 
   // Define columns with custom rendering
   const columns = useMemo(() => [
@@ -84,22 +109,6 @@ export default function BorrowingsTable() {
     },
   ], []);
 
-  // Handle row updates (can be extended for future functionality)
-  const processRowUpdate = (newRow) => {
-    setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)));
-    return newRow;
-  };
-
-  // Handle row deletion (optional feature for future use)
-  const _handleDeleteRow = (id) => {
-    setRows(rows.filter((row) => row.id !== id));
-  };
-
-  // Handle adding new row (optional feature for future use)
-  const _handleAddRow = (newRow) => {
-    const id = rows.length > 0 ? Math.max(...rows.map(r => r.id)) + 1 : 1;
-    setRows([...rows, { ...newRow, id }]);
-  };
   return (
     <Box 
       className="bg-white p-8 rounded-2xl shadow-sm w-full" 
@@ -109,15 +118,28 @@ export default function BorrowingsTable() {
         overflow: 'visible'
       }}
     >
-       <div className='flex justify-between mb-4'> <div className="text-lg font-extrabold mb-4">Recent Borrowings</div><div>
-        <button className="text-blue-600 font-bold hover:text-blue-800">View All</button></div></div>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        processRowUpdate={processRowUpdate}
-        hideFooter
-        autoHeight
-        disableColumnMenu
+       <div className='flex justify-between mb-4'> 
+         <div className="text-lg font-extrabold mb-4">Recent Borrowings</div>
+         <div>
+           <button 
+             onClick={() => navigate('/admin/borrowings/all')}
+             className="text-blue-600 font-bold hover:text-blue-800"
+           >
+             View All
+           </button>
+         </div>
+       </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+      ) : (
+        <DataGrid
+          rows={rowsWithBooks}
+          columns={columns}
+          hideFooter
+          autoHeight
+          disableColumnMenu
         sx={{ 
           textAlign: 'left',
           border: 'none',
@@ -178,6 +200,7 @@ export default function BorrowingsTable() {
         }}
         disableRowSelectionOnClick
       />
+      )}
     </Box>
   );
 }

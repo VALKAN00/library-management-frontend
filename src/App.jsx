@@ -10,6 +10,7 @@ import NotFound from './pages/NotFound'
 import LoginPage from './pages/LoginPage'
 import SignUPPage from './pages/SignUPPage'
 import AdminDashboard from './pages/AdminDashboard'
+import ViewAllBorrowings from './components/adminDashboard/ViewAll'
 import ManageUser from './pages/ManageUser'
 import MyBorrowings from './pages/MyBorrowings'
 import MyReservations from './pages/MyResrvations'
@@ -83,6 +84,8 @@ function AppRoutes() {
         <Route path="members" element={<Members />} />
         <Route path="history" element={<History />} />
         <Route path="admindashboard" element={<AdminDashboard />} />
+        <Route path="admin/dashboard" element={<AdminDashboard />} />
+        <Route path="admin/borrowings/all" element={<ViewAllBorrowings />} />
         <Route path="mangeusers" element={<ManageUser />} />
         <Route path="myborrowings" element={<MyBorrowings />} />
         <Route path="reservations" element={<MyReservations />} />
