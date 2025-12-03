@@ -1,165 +1,196 @@
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import {Pencil ,Trash} from 'lucide-react';
 import Person2Icon from '@mui/icons-material/Person2';
 import SearchIcon from '@mui/icons-material/Search';
-
-const columns = [
-  { field: 'name', headerName: 'Name', flex: 1 ,
-    renderCell: (params) => (
-      <div className="flex items-center gap-2">
-        {params.value.img ? params.value.img : <Person2Icon style={{ color: 'gray' }} />}
-        <span>{params.value.name}</span>
-      </div>
-    ),
-  },
-  { field: 'email', headerName: 'Email', flex: 1.2 },
-  { field: 'joinDate', headerName: 'Join Date', flex: 1},
-  { field: 'role', headerName: 'Role', flex: 1 },
-  {
-    field: 'status',
-    headerName: 'Status',
-    flex: 1,
-    renderCell: (params) => (
-      <span
-        style={{
-          backgroundColor:
-            params.value === 'Active'  ? '#d9fdd3' :
-            params.value === 'Pending' ? '#d3e3fd' :
-            params.value === 'Suspended' ? '#fee2e2' :
-            '#f3f3f3',
-          color: '#222',
-          padding: '4px 10px',
-          borderRadius: '12px',
-          fontWeight: '600',
-        }}
-      >
-        {params.value}
-      </span>
-    ),
-  },
-  { field: 'actions', headerName: 'Actions', flex: 1 ,
-    renderCell: () => (
-      <div className="flex gap-2">
-        <button className="text-gray-600 font-bold hover:text-blue-800"><Pencil className="inline-block mr-1" /></button>
-        <button className="text-gray-600 font-bold hover:text-red-800"><Trash className="inline-block mr-1" /></button>
-      </div>
-    ),  
-  },
-];
-
-const rows = [
-  {
-    id: 1,
-    name: {
-        img:<Person2Icon style={{ color: 'gray' }} />,
-    name:"John Carter"},
-    email: "john.carter@example.com",
-    role: "Student",
-    joinDate: "2024-09-12",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: {
-        img:<Person2Icon style={{ color: 'gray' }} />,
-    name:"Emily Brown"},
-    email: "emily.brown@example.com",
-    role: "Student",
-    joinDate: "2024-09-15",
-    status: "Active",
-  },
-  {
-    id: 3,
-      name: {
-        img:<Person2Icon style={{ color: 'gray' }} />,
-    name:"Liam Wilson"},
-    email: "liam.wilson@example.com",
-    role: "Student",
-    joinDate: "2024-09-20",
-    status: "Pending",
-  },
-  {
-    id: 4,
-      name: {
-        img:<Person2Icon style={{ color: 'gray' }} />,
-    name:"Sophia Davis"},
-    email: "sophia.davis@example.com",
-    role: "Student",
-    joinDate: "2024-09-25",
-    status: "Suspended",
-  },
-  {
-    id: 5,
-    name: {
-        img:<Person2Icon style={{ color: 'gray' }} />,
-    name:"Noah Lee"},
-    email: "noah.lee@example.com",
-    role: "Student",
-    joinDate: "2024-10-01",
-    status: "Active",
-  },
-  {
-    id: 6,
-   name: {
-        img:<Person2Icon style={{ color: 'gray' }} />,
-    name:"Ava Martinez"},
-    email: "ava.martinez@example.com",
-    role: "Student",
-    joinDate: "2024-10-05",
-    status: "Active",
-  },
-];
-
+import { membersAPI } from '../../api/MembersApi';
+import EditModal from './EditModal';
 
 
 export default function UsersTable() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+
+  // Fetch users from API
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching users from API...');
+      const response = await membersAPI.getAllMembers(1, 100); // Fetch first 100 users
+      console.log('API Response:', response);
+      
+      // Extract the members array from the response object
+      const data = response.members || [];
+      console.log('Members array:', data);
+      
+      // Transform API data to match table format
+      const transformedData = data.map((member) => ({
+        id: member.UserID,
+        name: {
+          img: <Person2Icon style={{ color: 'gray' }} />,
+          name: `${member.UserFirstName} ${member.UserLastName}`
+        },
+        email: member.UserName, // Using UserName as email/username
+        role: member.UserRole || 'Customer'
+      }));
+      
+      console.log('Transformed Data:', transformedData);
+      setUsers(transformedData);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      console.error('Error details:', error.response || error.message);
+      // Fallback to empty array on error
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await membersAPI.deleteMember(id);
+        // Refresh the list after deletion
+        fetchUsers();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Failed to delete user');
+      }
+    }
+  };
+
+  const handleEdit = (id) => {
+    // TODO: Implement edit functionality (open modal or navigate to edit page)
+    console.log('Edit user:', id);
+    setSelectedUserId(id);
+    setEditModalOpen(true);
+  };
+
+  // Define columns with actions
+  const columns = [
+    { field: 'name', headerName: 'Name', flex: 1.7 ,
+      renderCell: (params) => (
+        <div className="flex items-center gap-2">
+          {params.value.img ? params.value.img : <Person2Icon style={{ color: 'gray' }} />}
+          <span>{params.value.name}</span>
+        </div>
+      ),
+    },
+    { field: 'email', headerName: 'User Name', flex: 1.7 },
+  
+    { field: 'role', headerName: 'Role', flex: 1 },
+   
+    { field: 'actions', headerName: 'Actions', flex: 1 ,
+      renderCell: (params) => (
+        <div className="flex gap-2">
+          <button 
+            className="text-[#1c456eff] font-bold hover:text-gray-600"
+            onClick={() => handleEdit(params.row.id)}
+          > 
+            <Pencil className="inline-block mr-1" />
+          </button>
+          <button 
+            className="text-red-800 font-bold hover:text-gray-600"
+            onClick={() => handleDelete(params.row.id)}
+          >
+            <Trash className="inline-block mr-1" />
+          </button>
+        </div>
+      ),  
+    },
+  ];
+
+  // Filter users based on search term
+  const filteredUsers = users.filter((user) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      user.name.name.toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower) ||
+      user.role.toLowerCase().includes(searchLower) ||
+      user.status.toLowerCase().includes(searchLower)
+    );
+  });
+
   return (
-    <Box 
-      className="bg-white p-4 rounded-lg shadow-lg w-full" 
-      sx={{ 
-        height: { xs: 500, sm: 450, md: 450 },
-        width: '100%',
-        overflow: 'auto'
-      }}
-    >
-       <button className='bg-gray-300 my-3 h-10 px-2 rounded'><div className='flex gap-2'><div> <SearchIcon /></div><div><input type="text" placeholder="Search users..." /></div></div></button>
-      <DataGrid
-        rows={rows}
-        columns={columns }
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 5,
-            },
-          },
-        }}
+    <>
+      <Box 
+        className="bg-white p-4 rounded-lg shadow-lg w-full" 
         sx={{ 
-          
-          textAlign: 'left',
-          border: 'none',
-          minWidth: { xs: '600px', sm: '100%' },
-          '& .MuiDataGrid-cell': {
-            borderBottom: 'none',
-            fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-          },
-          '& .MuiDataGrid-columnHeaders': {
-            borderBottom: 'none',
-            backgroundColor: '#f8fafc',
-            fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
-          },
-          '& .MuiDataGrid-columnHeader': {
-            backgroundColor: '#f8fafc',
-            color: '#50555eff',
-          },
-          '& .MuiDataGrid-footerContainer': {
-            borderTop: 'none',
-          },
+          height: { xs: 500, sm: 450, md: 450 },
+          width: '100%',
+          overflow: 'auto'
         }}
-        pageSizeOptions={[5]}
-        disableRowSelectionOnClick
+      >
+         <button className='bg-gray-300 my-3 h-10 px-2 rounded'>
+          <div className='flex gap-2'>
+            <div><SearchIcon /></div>
+            <div>
+              <input 
+                type="text" 
+                placeholder="Search users..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+        </button>
+        <DataGrid
+          rows={filteredUsers}
+          columns={columns}
+          loading={loading}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 5,
+              },
+            },
+          }}
+          sx={{ 
+            
+            textAlign: 'left',
+            border: 'none',
+            minWidth: { xs: '600px', sm: '100%' },
+            '& .MuiDataGrid-cell': {
+              borderBottom: 'none',
+              fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+            },
+            '& .MuiDataGrid-columnHeaders': {
+              borderBottom: 'none',
+              backgroundColor: '#b2d3f4ff',
+              fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
+            },
+            '& .MuiDataGrid-columnHeader': {
+              backgroundColor: '#1c456eff',
+              color: '#f5f6f7ff',
+            },
+            '& .MuiDataGrid-footerContainer': {
+              borderTop: 'none',
+            },
+          }}
+          pageSizeOptions={[5]}
+          disableRowSelectionOnClick
+        />
+      </Box>
+      
+      {/* Edit Modal */}
+      <EditModal 
+        isOpen={editModalOpen} 
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedUserId(null);
+        }}
+        userId={selectedUserId}
+        onUserUpdated={fetchUsers}
       />
-    </Box>
+    </>
   );
 }
