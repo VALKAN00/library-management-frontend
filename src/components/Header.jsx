@@ -24,7 +24,7 @@ function Header() {
         <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
           <LibraryBig className="w-6 h-6 text-white" />
         </div>
-        <span className="text-xl font-bold text-gray-800">LibraryHub</span>
+        <span className="text-xl font-bold text-gray-800">BitBook</span>
       </div>
       <div className="right-section flex justify-between items-center gap-6 ">
         <div className="Welcome">

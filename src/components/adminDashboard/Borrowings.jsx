@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import { booksAPI } from '../../api/BooksApi';
+import { membersAPI } from "../../api/MembersApi";
 
 export default function BorrowingsTable({ borrowings = [] }) {
   const navigate = useNavigate()
@@ -21,10 +22,11 @@ export default function BorrowingsTable({ borrowings = [] }) {
         borrowings.map(async (borrowing) => {
           try {
             const bookData = await booksAPI.getById(borrowing.BookID)
+           const memberResponse = await membersAPI.getMemberById(borrowing.CusID);
             return {
               id: borrowing.BorrowID,
               title: bookData.Title || 'Unknown',
-              member: `User ${borrowing.CusID}`,
+              member:`${memberResponse.member.UserFirstName} ${memberResponse.member.UserLastName}` ,
               borrowDate: formatDate(borrowing.BorrowDate),
               dueDate: formatDate(borrowing.DueDate),
               status: getStatus(borrowing)
@@ -74,8 +76,8 @@ export default function BorrowingsTable({ borrowings = [] }) {
 
   // Define columns with custom rendering
   const columns = useMemo(() => [
-     { field: 'title', headerName: 'Book Title', flex: 1 },
-  { field: 'member', headerName: 'Member', flex: 1 },
+     { field: 'title', headerName: 'Book Title', flex: 2 },
+  { field: 'member', headerName: 'Member', flex: 2  },
   { field: 'borrowDate', headerName: 'Borrow Date', flex: 1 },
   { field: 'dueDate', headerName: 'Due Date', flex: 1 },
     {
@@ -156,12 +158,13 @@ export default function BorrowingsTable({ borrowings = [] }) {
             backgroundColor: 'transparent',
             fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' },
             fontWeight: '500',
-            color: '#6b7280',
+            color: '#e3e6edff',
             minHeight: '56px !important',
             maxHeight: '56px !important',
           },
           '& .MuiDataGrid-columnHeader': {
-         backgroundColor: '#f8fafc',
+         backgroundColor: '#99aabbff',
+         color: '#f1f4f8ff',
             padding: '16px',
             '&:focus': {
               outline: 'none',
