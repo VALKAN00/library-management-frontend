@@ -9,7 +9,7 @@ function Filter({ searchTerm, setSearchTerm, genreFilter, setGenreFilter, genres
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Search by title, author, or ISBN..."
+            placeholder="Search by title, author, or category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -22,7 +22,7 @@ function Filter({ searchTerm, setSearchTerm, genreFilter, setGenreFilter, genres
           onChange={(e) => setGenreFilter(e.target.value)}
           className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         >
-          <option value="all">All Genres</option>
+          <option value="all">All Categories</option>
           {genres.map(genre => (
             <option key={genre} value={genre}>{genre}</option>
           ))}
