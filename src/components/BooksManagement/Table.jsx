@@ -11,16 +11,16 @@ function Table({ filteredBooks, handleOpenDialog, handleDeleteBook, searchTerm, 
                 Book
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                ISBN
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                Genre
+                Category
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                 Publisher
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                 Year
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                Price
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                 Quantity
@@ -35,49 +35,53 @@ function Table({ filteredBooks, handleOpenDialog, handleDeleteBook, searchTerm, 
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredBooks.map((book) => (
-              <tr key={book.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={book.BookID} className="hover:bg-gray-50 transition-colors">
                 {/* Book Info */}
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">
                     <img
-                      src={book.coverImage}
-                      alt={book.title}
+                      src={book.Cover || "https://via.placeholder.com/150x200?text=No+Cover"}
+                      alt={book.Title}
                       className="w-12 h-16 object-cover rounded-lg shadow-md"
+                      onError={(e) => {
+                        e.target.onerror = null
+                        e.target.src = "https://via.placeholder.com/150x200?text=No+Cover"
+                      }}
                     />
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">
-                        {book.title}
+                        {book.Title}
                       </h3>
-                      <p className="text-sm text-gray-600">{book.author}</p>
+                      <p className="text-sm text-gray-600">{book.Author}</p>
                     </div>
                   </div>
                 </td>
 
                 <td className="px-6 py-4">
-                  <span className="text-gray-700 text-sm">{book.isbn}</span>
-                </td>
-
-                <td className="px-6 py-4">
                   <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
-                    {book.genre}
+                    {book.Category}
                   </span>
                 </td>
 
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{book.publisher}</span>
+                  <span className="text-gray-700">{book.Pub_Name}</span>
                 </td>
 
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{book.year}</span>
+                  <span className="text-gray-700">{book.Pub_Year}</span>
                 </td>
 
                 <td className="px-6 py-4">
-                  <span className="text-gray-700 font-semibold">{book.quantity}</span>
+                  <span className="text-gray-700 font-semibold">${book.Price}</span>
                 </td>
 
                 <td className="px-6 py-4">
-                  <span className={`font-semibold ${book.available > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {book.available}
+                  <span className="text-gray-700 font-semibold">{book.Quantity}</span>
+                </td>
+
+                <td className="px-6 py-4">
+                  <span className={`font-semibold ${book.Available_Copies > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {book.Available_Copies}
                   </span>
                 </td>
 
@@ -92,7 +96,7 @@ function Table({ filteredBooks, handleOpenDialog, handleDeleteBook, searchTerm, 
                       <Edit size={18} />
                     </button>
                     <button
-                      onClick={() => handleDeleteBook(book.id)}
+                      onClick={() => handleDeleteBook(book.BookID)}
                       className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
                       title="Delete Book"
                     >

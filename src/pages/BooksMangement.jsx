@@ -1,103 +1,128 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus, X } from "lucide-react"
-import { Dialog, DialogContent, DialogTitle, TextField, Button, IconButton } from "@mui/material"
+import { Dialog, DialogContent, DialogTitle, TextField, Button, IconButton, CircularProgress, Alert, Snackbar } from "@mui/material"
 import Filter from "../components/BooksManagement/Filter"
 import Table from "../components/BooksManagement/Table"
+import { manageBooksAPI } from "../api/ManageBooksapi"
 
 function BooksManagement() {
-  const [books, setBooks] = useState([
-    {
-      id: 1,
-      title: "The Midnight Library",
-      author: "Matt Haig",
-      isbn: "978-0525559474",
-      genre: "Fiction",
-      publisher: "Viking",
-      year: 2020,
-      quantity: 5,
-      available: 3,
-      coverImage: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400"
-    },
-    {
-      id: 2,
-      title: "Dune",
-      author: "Frank Herbert",
-      isbn: "978-0441172719",
-      genre: "Science Fiction",
-      publisher: "Ace",
-      year: 1965,
-      quantity: 8,
-      available: 6,
-      coverImage: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400"
-    },
-    {
-      id: 3,
-      title: "The Name of the Wind",
-      author: "Patrick Rothfuss",
-      isbn: "978-0756404079",
-      genre: "Fantasy",
-      publisher: "DAW Books",
-      year: 2007,
-      quantity: 4,
-      available: 2,
-      coverImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400"
-    },
-    {
-      id: 4,
-      title: "Sapiens",
-      author: "Yuval Noah Harari",
-      isbn: "978-0062316097",
-      genre: "Non-Fiction",
-      publisher: "Harper",
-      year: 2015,
-      quantity: 10,
-      available: 7,
-      coverImage: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=400"
-    }
-  ])
-
+  const [books, setBooks] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [genreFilter, setGenreFilter] = useState("all")
   const [openDialog, setOpenDialog] = useState(false)
   const [dialogMode, setDialogMode] = useState("add") // 'add' or 'edit'
   const [currentBook, setCurrentBook] = useState({
-    title: "",
-    author: "",
-    isbn: "",
-    genre: "",
-    publisher: "",
-    year: "",
-    quantity: "",
-    available: "",
-    coverImage: ""
+    BookID: 0,
+    Title: "",
+    Author: "",
+    Category: "",
+    Price: "",
+    Quantity: "",
+    Available_Copies: "",
+    Pub_Year: "",
+    Pub_Name: "",
+    Cover: "",
+    Rating: 0,
+    Availability: true
+  })
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success"
   })
 
-  const genres = ["Fiction", "Non-Fiction", "Science Fiction", "Fantasy", "Mystery", "Romance", "Biography", "History"]
+  const genres = ["Fiction", "Non-Fiction", "Science Fiction", "Fantasy", "Mystery", "Romance", "Biography", "History", "Technology", "Self-Help", "Thriller", "Horror", "Adventure"]
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity })
+  }
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false })
+  }
+
+  // Fetch books on component mount
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await manageBooksAPI.getAllBooks(1, 100)
+        // API returns object with books array: { page, limit, total, books: [...] }
+        setBooks(response.books || [])
+        setLoading(false)
+      } catch (err) {
+        console.error("Error fetching books:", err)
+        setError("Failed to load books. Please try again later.")
+        setBooks([]) // Reset to empty array on error
+        setLoading(false)
+        showSnackbar("Failed to load books", "error")
+      }
+    }
+    
+    fetchBooks()
+  }, [])
+
+  // Refetch books function (for updates after create/edit/delete)
+  const refetchBooks = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await manageBooksAPI.getAllBooks(1, 100)
+      setBooks(response.books || [])
+      setLoading(false)
+    } catch (err) {
+      console.error("Error fetching books:", err)
+      setError("Failed to load books. Please try again later.")
+      setBooks([])
+      setLoading(false)
+      showSnackbar("Failed to load books", "error")
+    }
+  }
 
   // Filter books based on search and genre
-  const filteredBooks = books.filter(book => {
-    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         book.isbn.includes(searchTerm)
-    const matchesGenre = genreFilter === "all" || book.genre === genreFilter
+  const filteredBooks = Array.isArray(books) ? books.filter(book => {
+    const matchesSearch = 
+      book.Title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      book.Author?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      book.Category?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesGenre = genreFilter === "all" || book.Category === genreFilter
     return matchesSearch && matchesGenre
-  })
+  }) : []
 
   const handleOpenDialog = (mode, book = null) => {
     setDialogMode(mode)
     if (mode === "edit" && book) {
-      setCurrentBook(book)
+      setCurrentBook({
+        BookID: book.BookID,
+        Title: book.Title || "",
+        Author: book.Author || "",
+        Category: book.Category || "",
+        Price: book.Price || "",
+        Quantity: book.Quantity || "",
+        Available_Copies: book.Available_Copies || "",
+        Pub_Year: book.Pub_Year || "",
+        Pub_Name: book.Pub_Name || "",
+        Cover: book.Cover || "",
+        Rating: book.Rating || 0,
+        Availability: book.Availability !== undefined ? book.Availability : true
+      })
     } else {
       setCurrentBook({
-        title: "",
-        author: "",
-        isbn: "",
-        genre: "",
-        publisher: "",
-        year: "",
-        quantity: "",
-        available: "",
-        coverImage: ""
+        BookID: 0,
+        Title: "",
+        Author: "",
+        Category: "",
+        Price: "",
+        Quantity: "",
+        Available_Copies: "",
+        Pub_Year: "",
+        Pub_Name: "",
+        Cover: "",
+        Rating: 0,
+        Availability: true
       })
     }
     setOpenDialog(true)
@@ -106,15 +131,18 @@ function BooksManagement() {
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setCurrentBook({
-      title: "",
-      author: "",
-      isbn: "",
-      genre: "",
-      publisher: "",
-      year: "",
-      quantity: "",
-      available: "",
-      coverImage: ""
+      BookID: 0,
+      Title: "",
+      Author: "",
+      Category: "",
+      Price: "",
+      Quantity: "",
+      Available_Copies: "",
+      Pub_Year: "",
+      Pub_Name: "",
+      Cover: "",
+      Rating: 0,
+      Availability: true
     })
   }
 
@@ -126,32 +154,59 @@ function BooksManagement() {
     }))
   }
 
-  const handleSaveBook = () => {
-    if (dialogMode === "add") {
-      const newBook = {
-        ...currentBook,
-        id: books.length + 1,
-        year: parseInt(currentBook.year),
-        quantity: parseInt(currentBook.quantity),
-        available: parseInt(currentBook.available)
+  const handleSaveBook = async () => {
+    try {
+      setLoading(true)
+      
+      const bookData = {
+        BookID: currentBook.BookID,
+        Category: currentBook.Category,
+        Title: currentBook.Title,
+        Author: currentBook.Author,
+        Price: parseFloat(currentBook.Price) || 0,
+        Quantity: parseInt(currentBook.Quantity) || 0,
+        Available_Copies: parseInt(currentBook.Available_Copies) || 0,
+        Pub_Year: parseInt(currentBook.Pub_Year) || 0,
+        Pub_Name: currentBook.Pub_Name,
+        Cover: currentBook.Cover,
+        Rating: parseFloat(currentBook.Rating) || 0,
+        Availability: currentBook.Availability
       }
-      setBooks([...books, newBook])
-    } else {
-      setBooks(books.map(book => 
-        book.id === currentBook.id ? {
-          ...currentBook,
-          year: parseInt(currentBook.year),
-          quantity: parseInt(currentBook.quantity),
-          available: parseInt(currentBook.available)
-        } : book
-      ))
+
+      if (dialogMode === "add") {
+        await manageBooksAPI.createBook(bookData)
+        showSnackbar("Book added successfully!", "success")
+      } else {
+        await manageBooksAPI.updateBook(currentBook.BookID, bookData)
+        showSnackbar("Book updated successfully!", "success")
+      }
+      
+      await refetchBooks()
+      handleCloseDialog()
+      setLoading(false)
+    } catch (err) {
+      console.error("Error saving book:", err)
+      showSnackbar(
+        `Failed to ${dialogMode === "add" ? "add" : "update"} book. ${err.response?.data?.message || ""}`,
+        "error"
+      )
+      setLoading(false)
     }
-    handleCloseDialog()
   }
 
-  const handleDeleteBook = (id) => {
+  const handleDeleteBook = async (id) => {
     if (window.confirm("Are you sure you want to delete this book?")) {
-      setBooks(books.filter(book => book.id !== id))
+      try {
+        setLoading(true)
+        await manageBooksAPI.deleteBook(id)
+        showSnackbar("Book deleted successfully!", "success")
+        await refetchBooks()
+        setLoading(false)
+      } catch (err) {
+        console.error("Error deleting book:", err)
+        showSnackbar("Failed to delete book. " + (err.response?.data?.message || ""), "error")
+        setLoading(false)
+      }
     }
   }
 
@@ -162,29 +217,60 @@ function BooksManagement() {
         <button
           onClick={() => handleOpenDialog("add")}
           className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
+          disabled={loading}
         >
           <Plus size={20} />
           Add New Book
         </button>
       </div>
 
+      {/* Error Alert */}
+      {error && (
+        <Alert severity="error" className="mb-4" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Loading State */}
+      {loading && !openDialog && (
+        <div className="flex justify-center items-center py-12">
+          <CircularProgress />
+        </div>
+      )}
+
       {/* Search and Filter Section */}
-      <Filter 
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        genreFilter={genreFilter}
-        setGenreFilter={setGenreFilter}
-        genres={genres}
-      />
+      {!loading && (
+        <Filter 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          genreFilter={genreFilter}
+          setGenreFilter={setGenreFilter}
+          genres={genres}
+        />
+      )}
 
       {/* Books Table */}
-      <Table 
-        filteredBooks={filteredBooks}
-        handleOpenDialog={handleOpenDialog}
-        handleDeleteBook={handleDeleteBook}
-        searchTerm={searchTerm}
-        genreFilter={genreFilter}
-      />
+      {!loading && (
+        <Table 
+          filteredBooks={filteredBooks}
+          handleOpenDialog={handleOpenDialog}
+          handleDeleteBook={handleDeleteBook}
+          searchTerm={searchTerm}
+          genreFilter={genreFilter}
+        />
+      )}
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
       {/* Add/Edit Book Dialog */}
       <Dialog 
@@ -207,8 +293,8 @@ function BooksManagement() {
             <TextField
               fullWidth
               label="Title"
-              name="title"
-              value={currentBook.title}
+              name="Title"
+              value={currentBook.Title}
               onChange={handleInputChange}
               required
               className="mb-4"
@@ -216,24 +302,16 @@ function BooksManagement() {
             <TextField
               fullWidth
               label="Author"
-              name="author"
-              value={currentBook.author}
+              name="Author"
+              value={currentBook.Author}
               onChange={handleInputChange}
               required
             />
             <TextField
               fullWidth
-              label="ISBN"
-              name="isbn"
-              value={currentBook.isbn}
-              onChange={handleInputChange}
-              required
-            />
-            <TextField
-              fullWidth
-              label="Genre"
-              name="genre"
-              value={currentBook.genre}
+              label="Category"
+              name="Category"
+              value={currentBook.Category}
               onChange={handleInputChange}
               select
               SelectProps={{ native: true }}
@@ -246,44 +324,62 @@ function BooksManagement() {
             </TextField>
             <TextField
               fullWidth
-              label="Publisher"
-              name="publisher"
-              value={currentBook.publisher}
+              label="Price"
+              name="Price"
+              type="number"
+              value={currentBook.Price}
               onChange={handleInputChange}
               required
             />
             <TextField
               fullWidth
-              label="Year"
-              name="year"
+              label="Publisher Name"
+              name="Pub_Name"
+              value={currentBook.Pub_Name}
+              onChange={handleInputChange}
+              required
+            />
+            <TextField
+              fullWidth
+              label="Publication Year"
+              name="Pub_Year"
               type="number"
-              value={currentBook.year}
+              value={currentBook.Pub_Year}
               onChange={handleInputChange}
               required
             />
             <TextField
               fullWidth
               label="Total Quantity"
-              name="quantity"
+              name="Quantity"
               type="number"
-              value={currentBook.quantity}
+              value={currentBook.Quantity}
               onChange={handleInputChange}
               required
             />
             <TextField
               fullWidth
               label="Available Copies"
-              name="available"
+              name="Available_Copies"
               type="number"
-              value={currentBook.available}
+              value={currentBook.Available_Copies}
               onChange={handleInputChange}
               required
             />
             <TextField
               fullWidth
+              label="Rating (0-5)"
+              name="Rating"
+              type="number"
+              inputProps={{ min: 0, max: 5, step: 0.1 }}
+              value={currentBook.Rating}
+              onChange={handleInputChange}
+            />
+            <TextField
+              fullWidth
               label="Cover Image URL"
-              name="coverImage"
-              value={currentBook.coverImage}
+              name="Cover"
+              value={currentBook.Cover}
               onChange={handleInputChange}
               className="md:col-span-2"
               placeholder="https://example.com/image.jpg"
@@ -296,6 +392,7 @@ function BooksManagement() {
               variant="outlined"
               color="inherit"
               className="px-6"
+              disabled={loading}
             >
               Cancel
             </Button>
@@ -303,9 +400,9 @@ function BooksManagement() {
               onClick={handleSaveBook}
               variant="contained"
               className="px-6 bg-indigo-600 hover:bg-indigo-700"
-              disabled={!currentBook.title || !currentBook.author || !currentBook.isbn}
+              disabled={!currentBook.Title || !currentBook.Author || !currentBook.Category || loading}
             >
-              {dialogMode === "add" ? "Add Book" : "Save Changes"}
+              {loading ? <CircularProgress size={24} /> : dialogMode === "add" ? "Add Book" : "Save Changes"}
             </Button>
           </div>
         </DialogContent>
