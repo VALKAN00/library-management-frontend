@@ -35,12 +35,14 @@ export default function UsersTable() {
       // Transform API data to match table format
       const transformedData = data.map((member) => ({
         id: member.UserID,
+        originalId: member.UserID, // Keep original ID for API calls
         name: {
-          img: <Person2Icon style={{ color: 'gray' }} />,
+          img: <Person2Icon className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0" />,
           name: `${member.UserFirstName} ${member.UserLastName}`
         },
         email: member.UserName, // Using UserName as email/username
-        role: member.UserRole || 'Customer'
+        role: member.UserRole || 'Customer',
+        status: member.UserStatus || 'Active' // Add status field for search
       }));
       
       console.log('Transformed Data:', transformedData);
@@ -68,10 +70,9 @@ export default function UsersTable() {
     }
   };
 
-  const handleEdit = (id) => {
-    // TODO: Implement edit functionality (open modal or navigate to edit page)
-    console.log('Edit user:', id);
-    setSelectedUserId(id);
+  const handleEdit = (row) => {
+    console.log('Edit user:', row.originalId || row.id);
+    setSelectedUserId(row.originalId || row.id);
     setEditModalOpen(true);
   };
 
@@ -93,14 +94,14 @@ export default function UsersTable() {
       renderCell: (params) => (
         <div className="flex gap-2">
           <button 
-            className="text-[#1c456eff] font-bold hover:text-gray-600"
-            onClick={() => handleEdit(params.row.id)}
+            className="text-[#3422efff] font-bold hover:text-gray-600"
+            onClick={() => handleEdit(params.row)}
           > 
             <Pencil className="inline-block mr-1" />
           </button>
           <button 
             className="text-red-800 font-bold hover:text-gray-600"
-            onClick={() => handleDelete(params.row.id)}
+            onClick={() => handleDelete(params.row.originalId || params.row.id)}
           >
             <Trash className="inline-block mr-1" />
           </button>
@@ -169,7 +170,7 @@ export default function UsersTable() {
               fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
             },
             '& .MuiDataGrid-columnHeader': {
-              backgroundColor: '#1c456eff',
+              backgroundColor: '#3422efff',
               color: '#f5f6f7ff',
             },
             '& .MuiDataGrid-footerContainer': {
