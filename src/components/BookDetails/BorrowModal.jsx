@@ -32,7 +32,12 @@ function BorrowModal({ isOpen, onClose, book }) {
       await borrowingsAPI.create(borrowData)
       setShowSuccess(true)
     } catch (err) {
-      setError(err.message || 'Failed to borrow book. Please try again.')
+      // Check if it's a 400 error (already borrowed)
+      if (err.response?.status === 400) {
+        setError('You have already borrowed this book. Please return it first before borrowing again.')
+      } else {
+        setError(err.response?.data?.error || err.error || 'You have already borrowed this book. Please return it first before borrowing again.')
+      }
     } finally {
       setLoading(false)
     }
