@@ -150,7 +150,7 @@ export default function ManageBorrow() {
         } catch (err) {
             console.error("Error creating borrowing:", err);
             showSnackbar(
-                `Failed to create borrowing. ${err.response?.data?.message || ""}`,
+                `Failed to create borrowing. ${err.response?.data?.error || ""}`,
                 "error"
             );
             setLoading(false);
