@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, BookOpen, Clock, ChartBar, LogOut, LibraryBig, DollarSign } from 'lucide-react'
 import PeopleIcon from '@mui/icons-material/People';
 import { useAuth } from '../context/AuthContext';
+import BookOnlineIcon from '@mui/icons-material/BookOnline';
 
 function Sidebar() {
   const { logout } = useAuth();
@@ -9,16 +10,16 @@ function Sidebar() {
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/books', icon: BookOpen, label: 'Browse Books' },
     { path: '/myborrowings', icon: LibraryBig, label: 'My Borrowings' },
-    { path: '/reservations', icon: LibraryBig, label: 'My Reservations' },
+    { path: '/reservations', icon: BookOnlineIcon, label: 'My Reservations' },
     { path: '/myfines', icon: DollarSign, label: 'My Fines' },
     { path: '/history', icon: Clock, label: 'History' },
     {path:'/admindashboard', icon: LayoutDashboard, label: 'Admin Dashboard' },
     {path:'/mangeusers', icon: PeopleIcon, label: 'Manage Users' },
-    {path:'/BooksManagement', icon: LibraryBig, label: 'Books Management' },
+    {path:'/BooksManagement', icon: BookOpen, label: 'Books Management' },
     {path:'/report', icon: ChartBar , label: 'Reports' },
     {path:'/manageborrow', icon: LibraryBig, label: 'Manage Borrowing' },
-    {path:'/managereserve', icon: LibraryBig, label: 'Reservations' },
-    {path:'/finepayment', icon: LibraryBig, label: 'Fines & Payments' },
+    {path:'/managereserve', icon: BookOnlineIcon, label: 'Manage Reservations' },
+    {path:'/finepayment', icon: DollarSign, label: 'Fines & Payments' },
   ]
 
   const getLinkClass = ({ isActive }) =>
