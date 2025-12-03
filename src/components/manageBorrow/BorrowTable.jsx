@@ -1,4 +1,4 @@
-
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -6,172 +6,157 @@ import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import SearchIcon from '@mui/icons-material/Search';
 
-const columns = [
-  { 
-    field: 'bookTitle', 
-    headerName: 'Book Title', 
-    flex: 1.8,
-    minWidth: 180,
-  },
-  { 
-    field: 'borrower', 
-    headerName: 'Borrower', 
-    flex: 1.3,
-    minWidth: 140,
-  },
-  { 
-    field: 'borrowDate', 
-    headerName: 'Borrow Date', 
-    flex: 1.2,
-    minWidth: 130,
-  },
-  { 
-    field: 'dueDate', 
-    headerName: 'Due Date', 
-    flex: 1.2,
-    minWidth: 130,
-  },
-  { 
-    field: 'returnDate', 
-    headerName: 'Return Date', 
-    flex: 1.2,
-    minWidth: 130,
-  },
-  {
-    field: 'status',
-    headerName: 'Status',
-    flex: 1,
-    minWidth: 110,
-    renderCell: (params) => (
-      <span
-        style={{
-          color: '#ffffff',
-          backgroundColor:
-            params.value === 'Borrowed' ? '#3b82f6' :
-            params.value === 'Returned' ? '#059669' :
-            params.value === 'Overdue' ? '#dc2626' :
-            params.value === 'Lost' ? '#d97706' :
-            '#6b7280',
-          padding: '6px 14px',
-          borderRadius: '6px',
-          fontWeight: '600',
-          fontSize: '0.813rem',
-          display: 'inline-block',
-          textAlign: 'center',
-          minWidth: '85px',
-        }}
-      >
-        {params.value}
-      </span>
-    ),
-  },
-  {
-    field: 'actions',
-    headerName: 'Actions',
-    flex: 1.2,
-    minWidth: 140,
-    sortable: false,
-    filterable: false,
-    renderCell: (params) => {
-      const actions = params.row.actions;
+export default function BorrowTable({ borrowings, onReturn, onRenew, loading }) {
+  const [searchTerm, setSearchTerm] = useState('');
 
-      if (actions === "No actions") {
-        return <span className="text-gray-400 text-sm">No action...</span>;
-      }
+  // Format date helper
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
 
-      if (!actions) {
-        return <span className="text-gray-400 text-sm">-</span>;
-      }
+  // Determine status based on dates
+  const getStatus = (borrow) => {
+    if (borrow.ReturnDate) return 'Returned';
+    
+    const now = new Date();
+    const dueDate = new Date(borrow.DueDate);
+    
+    if (now > dueDate) return 'Overdue';
+    return 'Borrowed';
+  };
 
-      return (
-        <div className="flex gap-2 items-center">
-          {actions.edit && (
+  const columns = [
+    { 
+      field: 'BookTitle', 
+      headerName: 'Book Title', 
+      flex: 2,
+      minWidth: 180,
+    },
+    { 
+      field: 'CustomerName', 
+      headerName: 'Customer Name', 
+      flex: 2,
+      minWidth: 180,
+    },
+    { 
+      field: 'BorrowDate', 
+      headerName: 'Borrow Date', 
+      flex: 1.2,
+      minWidth: 130,
+      renderCell: (params) => formatDate(params.value),
+    },
+    { 
+      field: 'DueDate', 
+      headerName: 'Due Date', 
+      flex: 1.2,
+      minWidth: 130,
+      renderCell: (params) => formatDate(params.value),
+    },
+    { 
+      field: 'ReturnDate', 
+      headerName: 'Return Date', 
+      flex: 1.2,
+      minWidth: 130,
+      renderCell: (params) => formatDate(params.value),
+    },
+    {
+      field: 'Status',
+      headerName: 'Status',
+      flex: 1,
+      minWidth: 110,
+      renderCell: (params) => {
+        const status = params.value;
+        return (
+          <span
+            style={{
+              color: '#ffffff',
+              backgroundColor:
+                status === 'borrowed' || status === 'Borrowed' ? '#3b82f6' :
+                status === 'returned' || status === 'Returned' ? '#059669' :
+                status === 'overdue' || status === 'Overdue' ? '#dc2626' :
+                '#6b7280',
+              padding: '6px 14px',
+              borderRadius: '6px',
+              fontWeight: '600',
+              fontSize: '0.813rem',
+              display: 'inline-block',
+              textAlign: 'center',
+              minWidth: '85px',
+            }}
+          >
+            {status}
+          </span>
+        );
+      },
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1.2,
+      minWidth: 140,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => {
+        const row = params.row;
+        const status = row.Status;
+
+        // If already returned, no actions available
+        if (status === 'Returned' || status === 'returned') {
+          return <span className="text-gray-400 text-sm">No actions</span>;
+        }
+
+        return (
+          <div className="flex gap-2 items-center">
             <button 
               className="text-green-600 hover:text-green-700 transition-colors p-1 rounded-full hover:bg-green-50" 
               title="Mark as Returned"
+              onClick={() => onReturn(row.BorrowID)}
+              disabled={loading}
             >
               <CheckCircleOutlineIcon sx={{ fontSize: 24 }} />
             </button>
-          )}
-          {actions.refresh && (
             <button 
               className="text-blue-600 hover:text-blue-700 transition-colors p-1 rounded-full hover:bg-blue-50" 
               title="Renew"
+              onClick={() => onRenew(row.BorrowID)}
+              disabled={loading}
             >
               <ChangeCircleIcon sx={{ fontSize: 24 }} />
             </button>
-          )}
-          {actions.delete && (
-            <button 
-              className="text-red-600 hover:text-red-700 transition-colors p-1 rounded-full hover:bg-red-50" 
-              title="Report Issue"
-            >
-              <ErrorOutlineIcon sx={{ fontSize: 24 }} />
-            </button>
-          )}
-        </div>
-      );
-    },
-  }
+          </div>
+        );
+      },
+    }
+  ];
 
-];
+  // Filter borrowings based on search term
+  const filteredBorrowings = borrowings.filter(borrow => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      borrow.BookTitle?.toLowerCase().includes(searchLower) ||
+      borrow.CustomerName?.toLowerCase().includes(searchLower) ||
+      borrow.BookID?.toString().includes(searchLower) ||
+      borrow.CusID?.toString().includes(searchLower) ||
+      borrow.Status?.toLowerCase().includes(searchLower)
+    );
+  });
 
-const rows= [
-  {
-    id: 1,
-    bookTitle: "Atomic Habits",
-    borrower: "Emily White",
-    borrowDate: "2023-10-28",
-    dueDate: "2023-11-18",
-    returnDate: "-",
-    status: "Borrowed",
-    actions: { edit: true, refresh: true, delete: true }
-  },
-  {
-    id: 2,
-    bookTitle: "Project Hail Mary",
-    borrower: "David Green",
-    borrowDate: "2023-10-01",
-    dueDate: "2023-10-22",
-    returnDate: "-",
-    status: "Overdue",
-    actions: { edit: true, refresh: true, delete: true }
-  },
-  {
-    id: 3,
-    bookTitle: "The Midnight Library",
-    borrower: "John Smith",
-    borrowDate: "2023-10-15",
-    dueDate: "2023-11-05",
-    returnDate: "2023-11-02",
-    status: "Returned",
-    actions: "No actions"
-  },
-  {
-    id: 4,
-    bookTitle: "Dune",
-    borrower: "Jessica Atreides",
-    borrowDate: "2023-09-20",
-    dueDate: "2023-10-11",
-    returnDate: "-",
-    status: "Lost",
-    actions: "No actions"
-  },
-  {
-    id: 5,
-    bookTitle: "Klara and the Sun",
-    borrower: "Sarah Johnson",
-    borrowDate: "2023-10-30",
-    dueDate: "2023-11-20",
-    returnDate: "-",
-    status: "Borrowed",
-    actions: { edit: true, refresh: true, delete: true }
-  },
-];
+  // Transform borrowings data for DataGrid
+  const rows = filteredBorrowings.map(borrow => ({
+    id: borrow.BorrowID,
+    BorrowID: borrow.BorrowID,
+    BookID: borrow.BookID,
+    CusID: borrow.CusID,
+    BookTitle: borrow.BookTitle || `Book #${borrow.BookID}`,
+    CustomerName: borrow.CustomerName || `Customer #${borrow.CusID}`,
+    BorrowDate: borrow.BorrowDate,
+    DueDate: borrow.DueDate,
+    ReturnDate: borrow.ReturnDate,
+    Status: borrow.Status || getStatus(borrow),
+  }));
 
-
-
-export default function BorrowTable() {
   return (
     <Box 
       className="bg-white rounded-lg shadow w-full" 
@@ -186,8 +171,10 @@ export default function BorrowTable() {
           <SearchIcon sx={{ color: '#9ca3af', fontSize: 20 }} />
           <input 
             type="text" 
-            placeholder="Search users..." 
+            placeholder="Search by Book Title, Customer Name, or Status..." 
             className='bg-transparent border-none outline-none ml-2 text-sm w-full text-gray-700'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
@@ -195,6 +182,7 @@ export default function BorrowTable() {
       <DataGrid
         rows={rows}
         columns={columns}
+        loading={loading}
         initialState={{
           pagination: {
             paginationModel: {
@@ -230,8 +218,8 @@ export default function BorrowTable() {
             maxHeight: '56px !important',
           },
           '& .MuiDataGrid-columnHeader': {
-            backgroundColor: '#f9fafb',
-            color: '#6b7280',
+            backgroundColor: '#6b7885ff',
+            color: '#e3e8f3ff',
             fontWeight: '600',
             padding: '16px',
           },
@@ -244,7 +232,7 @@ export default function BorrowTable() {
             marginTop: '0 !important',
           },
         }}
-        pageSizeOptions={[5]}
+        pageSizeOptions={[5, 10, 20]}
         disableRowSelectionOnClick
       />
     </Box>
