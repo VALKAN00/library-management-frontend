@@ -1,6 +1,6 @@
-import { Search, Download } from "lucide-react"
+import { Search } from "lucide-react"
 
-function ReportFilter({ reportType, setReportType, onGenerate, onExport }) {
+function ReportFilter({ reportType, setReportType, onGenerate}) {
   const reportTypes = [
     { value: "popular-books", label: "Popular Books" },
     { value: "all-borrowings", label: "All Borrowings" },
@@ -11,9 +11,11 @@ function ReportFilter({ reportType, setReportType, onGenerate, onExport }) {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-[8fr_2fr] gap-4 items-end ">
         {/* Report Type */}
-        <div>
+       
+          
+        <div >
           <label className="block text-gray-700 text-sm font-semibold mb-2">
             Report Type
           </label>
@@ -38,13 +40,7 @@ function ReportFilter({ reportType, setReportType, onGenerate, onExport }) {
             <Search size={20} />
             Generate
           </button>
-          <button
-            onClick={onExport}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
-          >
-            <Download size={20} />
-            Export
-          </button>
+        
         </div>
       </div>
     </div>

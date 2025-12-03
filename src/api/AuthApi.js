@@ -37,4 +37,8 @@ export const authAPI = {
   logout: async () => {
     return axios.post(`${API_URL}/api/auth/logout`);
   },
+
+  createAdmin: async (adminData) => {
+    return axios.post(`${API_URL}/api/auth/admins`, adminData);
+  },
 };

@@ -14,32 +14,58 @@ function EditModal({ isOpen, onClose, userId, onUserUpdated }) {
   const [error, setError] = useState('')
   const [fetchingUser, setFetchingUser] = useState(false)
 
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setShowSuccess(false)
+      setLoading(false)
+      setError('')
+    }
+  }, [isOpen])
+
   // Fetch user data when userId changes
   useEffect(() => {
     const fetchUserData = async () => {
+      if (!isOpen || !userId) return;
+      
       try {
         setFetchingUser(true)
         setError('')
+        console.log('Fetching user with ID:', userId)
+        
         const userData = await membersAPI.getMemberById(userId)
         console.log('Fetched user data:', userData)
+        console.log('UserFirstName:', userData.UserFirstName)
+        console.log('UserLastName:', userData.UserLastName)
+        console.log('UserName:', userData.UserName)
+        console.log('UserRole:', userData.UserRole)
+        
+        // Handle different possible response structures
+        const user = userData.user || userData.member || userData
         
         setFormData({
-          firstName: userData.UserFirstName || '',
-          lastName: userData.UserLastName || '',
-          username: userData.UserName || '',
-          role: userData.UserRole || 'customer'
+          firstName: user.UserFirstName || user.firstName || '',
+          lastName: user.UserLastName || user.lastName || '',
+          username: user.UserName || user.username || '',
+          role: user.UserRole || user.role || 'customer'
+        })
+        
+        console.log('Form data set:', {
+          firstName: user.UserFirstName || user.firstName || '',
+          lastName: user.UserLastName || user.lastName || '',
+          username: user.UserName || user.username || '',
+          role: user.UserRole || user.role || 'customer'
         })
       } catch (err) {
         console.error('Error fetching user:', err)
-        setError('Failed to load user data')
+        console.error('Error details:', err.response?.data || err.message)
+        setError('Failed to load user data: ' + (err.response?.data?.message || err.message))
       } finally {
         setFetchingUser(false)
       }
     }
 
-    if (isOpen && userId) {
-      fetchUserData()
-    }
+    fetchUserData()
   }, [isOpen, userId])
 
   if (!isOpen) return null
@@ -245,7 +271,12 @@ function EditModal({ isOpen, onClose, userId, onUserUpdated }) {
                User Edited!
               </h2>
 
-            
+              <button
+                onClick={handleDone}
+                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors shadow-lg mt-6"
+              >
+                Done
+              </button>
             </>
           )}
         </div>
