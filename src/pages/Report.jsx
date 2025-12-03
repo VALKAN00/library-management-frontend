@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { reportAPI } from "../api/ReportApi"
-import ReportFilter from "../components/Report/ReportFilter"
+import ReportFilter from "../components/Report/ReportFilter.jsx"
 import PopularBooksReport from "../components/Report/PopularBooksReport"
 import AllBorrowingsReport from "../components/Report/AllBorrowingsReport"
 import AllReservationsReport from "../components/Report/AllReservationsReport"
