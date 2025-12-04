@@ -5,7 +5,6 @@ function ReportFilter({ reportType, setReportType, onGenerate}) {
     { value: "popular-books", label: "Popular Books" },
     { value: "all-borrowings", label: "All Borrowings" },
     { value: "all-reservations", label: "All Reservations" },
-    { value: "overdue-books", label: "Overdue Books" },
     { value: "member-activity", label: "Member Activity" }
   ]
 

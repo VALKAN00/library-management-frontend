@@ -4,7 +4,6 @@ import ReportFilter from "../components/Report/ReportFilter.jsx"
 import PopularBooksReport from "../components/Report/PopularBooksReport"
 import AllBorrowingsReport from "../components/Report/AllBorrowingsReport"
 import AllReservationsReport from "../components/Report/AllReservationsReport"
-import OverdueBooksReport from "../components/Report/OverdueBooksReport"
 import MemberActivityReport from "../components/Report/MemberActivityReport"
 
 function Report() {
@@ -34,11 +33,6 @@ function Report() {
           response = await reportAPI.getAllReservations()
           console.log('All reservations response:', response)
           setReportData(response.reservations || [])
-          break
-        case 'overdue-books':
-          response = await reportAPI.getOverdueBooks()
-          console.log('Overdue books response:', response)
-          setReportData(response.overdue || [])
           break
         case 'member-activity':
           response = await reportAPI.getMemberActivity()
@@ -117,9 +111,6 @@ function Report() {
             )}
             {reportType === "all-reservations" && (
               <AllReservationsReport data={reportData} />
-            )}
-            {reportType === "overdue-books" && (
-              <OverdueBooksReport data={reportData} />
             )}
             {reportType === "member-activity" && (
               <MemberActivityReport data={reportData} />
