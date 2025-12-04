@@ -43,7 +43,7 @@ function Report() {
         case 'member-activity':
           response = await reportAPI.getMemberActivity()
           console.log('Member activity response:', response)
-          setReportData(response.activity || [])
+          setReportData(response.data || [])
           break
         default:
           setReportData([])
