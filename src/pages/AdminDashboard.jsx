@@ -76,12 +76,12 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div>
-            <div className="">
-                <h1 className="text-2xl font-bold position-relative">Admin Dashboard</h1>
-                <p className="text-gray-500">Welcome back, Admin. Here's what's happening today.</p>
+        <div className="px-4 md:px-0">
+            <div className="mb-4 md:mb-6">
+                <h1 className="text-2xl md:text-4xl font-bold position-relative">Admin Dashboard</h1>
+                <p className="text-sm md:text-base text-gray-500">Welcome back, Admin. Here's what's happening today.</p>
             </div>
-            <div className="grid grid-cols-4 gap-4 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-6">
                 {card.map((item, index) => (
                     <StatusCard key={index} card={item} />
                 ))}

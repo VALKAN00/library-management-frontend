@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import UserBooksCard from "../components/userDashboard/UserBooksCard";
 import StatusCard from "../components/userDashboard/StatusCard";
 import { BookOpen, Bookmark, RotateCcw } from 'lucide-react';
-import { userDashboardAPI } from '../api/UserDashboard';
+import { borrowingsAPI } from '../api/BorrowingsApi';
+import { reservationsAPI } from '../api/ReservationsApi';
 import { booksAPI } from '../api/BooksApi';
 
 const bookIcon = <BookOpen />;
@@ -10,27 +12,41 @@ const bookmarkIcon = <Bookmark />;
 const returnIcon = <RotateCcw />;
 
 export default function UserDashboard() {  
+  const location = useLocation()
   const [dashboardData, setDashboardData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [borrowingsWithBooks, setBorrowingsWithBooks] = useState([])
   const [reservationsWithBooks, setReservationsWithBooks] = useState([])
 
+  // Refresh dashboard whenever the location changes (navigating back to dashboard)
   useEffect(() => {
     fetchDashboardData()
-  }, [])
+  }, [location])
 
   const fetchDashboardData = async () => {
     setLoading(true)
     setError('')
     try {
-      const response = await userDashboardAPI.getDashboardData()
-      setDashboardData(response)
+      // Fetch borrowings directly
+      const borrowingsResponse = await borrowingsAPI.getMyBorrowings()
+      console.log('My Borrowings Response:', borrowingsResponse)
+      const borrowings = borrowingsResponse.borrowings || []
+
+      // Fetch reservations directly
+      const reservationsResponse = await reservationsAPI.getMyReservations()
+      console.log('My Reservations Response:', reservationsResponse)
+      const reservations = reservationsResponse.reservations || []
+
+      setDashboardData({
+        borrowings,
+        reservations
+      })
 
       // Fetch book details for latest borrowings
-      if (response.borrowings && response.borrowings.length > 0) {
+      if (borrowings.length > 0) {
         const borrowingsWithBooksData = await Promise.all(
-          response.borrowings.map(async (borrowing) => {
+          borrowings.map(async (borrowing) => {
             try {
               const bookData = await booksAPI.getById(borrowing.BookID)
               return {
@@ -50,9 +66,9 @@ export default function UserDashboard() {
       }
 
       // Fetch book details for latest reservations
-      if (response.reservations && response.reservations.length > 0) {
+      if (reservations.length > 0) {
         const reservationsWithBooksData = await Promise.all(
-          response.reservations.map(async (reservation) => {
+          reservations.map(async (reservation) => {
             try {
               const bookData = await booksAPI.getById(reservation.BookID)
               return {
@@ -71,6 +87,7 @@ export default function UserDashboard() {
         setReservationsWithBooks(reservationsWithBooksData)
       }
     } catch (err) {
+      console.error('Error fetching dashboard data:', err)
       setError(err.message || 'Failed to fetch dashboard data')
     } finally {
       setLoading(false)

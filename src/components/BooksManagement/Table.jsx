@@ -3,7 +3,8 @@ import { Edit, Trash2, BookOpen } from "lucide-react"
 function Table({ filteredBooks, handleOpenDialog, handleDeleteBook, searchTerm, genreFilter }) {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Desktop Table */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="min-w-full">
           <thead className="bg-indigo-600 text-white">
             <tr>
@@ -108,6 +109,76 @@ function Table({ filteredBooks, handleOpenDialog, handleDeleteBook, searchTerm, 
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden p-4 space-y-4">
+        {filteredBooks.map((book) => (
+          <div key={book.BookID} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+            <div className="flex gap-3 p-4">
+              <img
+                src={book.Cover || "https://via.placeholder.com/150x200?text=No+Cover"}
+                alt={book.Title}
+                className="w-16 h-24 object-cover rounded-lg shadow-md shrink-0"
+                onError={(e) => {
+                  e.target.onerror = null
+                  e.target.src = "https://via.placeholder.com/150x200?text=No+Cover"
+                }}
+              />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                  {book.Title}
+                </h3>
+                <p className="text-xs text-gray-600 mb-2 truncate">{book.Author}</p>
+                <span className="inline-block px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
+                  {book.Category}
+                </span>
+              </div>
+            </div>
+            
+            <div className="px-4 pb-3 grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-gray-500">Publisher:</span>
+                <div className="font-medium text-gray-900 truncate">{book.Pub_Name}</div>
+              </div>
+              <div>
+                <span className="text-gray-500">Year:</span>
+                <div className="font-medium text-gray-900">{book.Pub_Year}</div>
+              </div>
+              <div>
+                <span className="text-gray-500">Price:</span>
+                <div className="font-semibold text-gray-900">${book.Price}</div>
+              </div>
+              <div>
+                <span className="text-gray-500">Quantity:</span>
+                <div className="font-semibold text-gray-900">{book.Quantity}</div>
+              </div>
+              <div className="col-span-2">
+                <span className="text-gray-500">Available: </span>
+                <span className={`font-semibold ${book.Available_Copies > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {book.Available_Copies} copies
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 p-3 bg-gray-50 border-t border-gray-200">
+              <button
+                onClick={() => handleOpenDialog("edit", book)}
+                className="flex-1 flex items-center justify-center gap-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
+              >
+                <Edit size={16} />
+                <span>Edit</span>
+              </button>
+              <button
+                onClick={() => handleDeleteBook(book.BookID)}
+                className="flex-1 flex items-center justify-center gap-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
+              >
+                <Trash2 size={16} />
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Empty State */}

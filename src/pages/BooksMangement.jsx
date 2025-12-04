@@ -211,15 +211,15 @@ function BooksManagement() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-900">Books Management</h1>
+    <div className="container mx-auto px-4 py-4 md:py-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-8 gap-3">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900">Books Management</h1>
         <button
           onClick={() => handleOpenDialog("add")}
-          className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
+          className="flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg text-sm md:text-base w-full sm:w-auto"
           disabled={loading}
         >
-          <Plus size={20} />
+          <Plus size={18} className="md:w-5 md:h-5" />
           Add New Book
         </button>
       </div>

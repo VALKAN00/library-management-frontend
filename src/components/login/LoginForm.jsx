@@ -50,7 +50,7 @@ return (
    
 
     {/* Card Container */}
-    <div className="bg-white rounded-xl shadow-2xl p-6 sm:p-8 mx-4 sm:mx-0">
+    <div className="bg-black/30 backdrop-blur-sm rounded-xl shadow-2xl p-6 sm:p-8 mx-4 sm:mx-0">
          <div className="text-center mb-4 sm:mb-6 px-4 sm:px-0">
       <div className="flex items-center justify-center gap-2 mb-2 sm:mb-3">
        
@@ -59,11 +59,11 @@ return (
     </span>
       </div>
 
-      <h2 className="text-base sm:text-lg font-semibold text-gray-700 mb-1">
+      <h2 className="text-base sm:text-lg font-semibold text-white mb-1">
         Welcome Back!
       </h2>
 
-      <p className="text-xs sm:text-sm text-gray-600">
+      <p className="text-xs sm:text-sm text-white">
         Sign in to manage your library.
       </p>
     </div>
@@ -78,7 +78,7 @@ return (
 
         {/* Email Input */}
         <div>
-          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-white mb-2">
             Username
           </label>
           <input
@@ -87,7 +87,7 @@ return (
             value={formData.username}
             onChange={handleChange}
             placeholder="Enter your username"
-            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
+            className="text-white w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
             required
           />
         </div>
@@ -95,7 +95,7 @@ return (
         {/* Password Input */}
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="block text-xs sm:text-sm font-medium text-gray-700">
+            <label className="block text-xs sm:text-sm font-medium text-white">
               Password
             </label>
            
@@ -106,7 +106,7 @@ return (
             value={formData.password}
             onChange={handleChange}
             placeholder="••••••••"
-            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
+            className="text-white w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
             required
           />
         </div>
@@ -119,7 +119,7 @@ return (
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
-        <div className="text-center mt-4"><span className='text-gray-600'>Don't have an account? </span><Link to="/signup" className="text-blue-600 hover:underline">Sign up</Link></div>
+        <div className="text-center mt-4"><span className='text-white'>Don't have an account? </span><Link to="/signup" className="text-blue-400 hover:text-blue-300 underline">Sign up</Link></div>
       </form>
     </div>
 

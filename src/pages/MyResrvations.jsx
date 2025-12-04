@@ -187,10 +187,10 @@ function MyReservations() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">My Reservations</h1>
+      <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">My Reservations</h1>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      {/* Desktop Table View - Hidden on Mobile */}
+      <div className="hidden lg:block bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
             {/* Table Header */}
@@ -323,6 +323,131 @@ function MyReservations() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Card View - Hidden on Desktop */}
+      <div className="lg:hidden space-y-4">
+        {loading ? (
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center text-gray-600">
+            Loading reservations...
+          </div>
+        ) : error ? (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="text-center text-red-600">{error}</div>
+          </div>
+        ) : reservations.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="text-center">
+              <div className="text-gray-400 mb-4">
+                <svg
+                  className="mx-auto h-24 w-24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No Reservations Yet
+              </h3>
+              <p className="text-gray-600">
+                You haven't reserved any books yet. Start exploring our collection!
+              </p>
+            </div>
+          </div>
+        ) : (
+          reservations.map((reservation) => {
+            const statusInfo = calculateStatusInfo(reservation)
+            const book = reservation.bookDetails
+            
+            return (
+              <div key={reservation.ReservationID} className="bg-white rounded-xl shadow-lg p-4">
+                {/* Book Info */}
+                <div className="flex gap-4 mb-4">
+                  <img
+                    src={book?.Cover || defaultImage}
+                    alt={book?.Title || 'Book'}
+                    className="w-16 h-24 object-cover rounded-lg shadow-md shrink-0"
+                    onError={(e) => {
+                      if (e.target.src !== defaultImage) {
+                        e.target.src = defaultImage
+                      }
+                    }}
+                  />
+                  <div className="grow">
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      {book?.Title || 'Loading...'}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">{book?.Author || ''}</p>
+                    {getStatusBadge(statusInfo.status, statusInfo.text)}
+                  </div>
+                </div>
+
+                {/* Dates */}
+                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                  <div>
+                    <p className="text-gray-500 mb-1">Reservation Date</p>
+                    <p className="text-gray-700 font-medium">
+                      {new Date(reservation.ReservationDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 mb-1">Expiry Date</p>
+                    <p className="text-gray-700 font-medium">
+                      {reservation.ExpiryDate ? new Date(reservation.ExpiryDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      }) : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                {statusInfo.status === "expired" ? (
+                  <button
+                    disabled
+                    className="w-full px-4 py-2 bg-gray-300 text-gray-500 font-semibold rounded-lg cursor-not-allowed text-sm"
+                  >
+                    Expired
+                  </button>
+                ) : statusInfo.status === "ready" ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openPickupModal(reservation)}
+                      className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors text-sm"
+                    >
+                      Pickup
+                    </button>
+                    <button 
+                      onClick={() => openCancelModal(reservation)}
+                      className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => openCancelModal(reservation)}
+                    className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors text-sm"
+                  >
+                    Cancel Reservation
+                  </button>
+                )}
+              </div>
+            )
+          })
+        )}
       </div>
 
       {/* Modals */}

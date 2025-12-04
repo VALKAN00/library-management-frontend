@@ -237,30 +237,30 @@ export default function FineTable({ fines = [], loading, error, isAdmin, onPayFi
 
   return (
     <>
+      {/* Search Bar */}
+      <div className='p-4 md:p-6 pb-4 bg-white rounded-t-lg'>
+        <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4'>
+          <h1 className='text-lg md:text-xl font-semibold text-gray-800'>All Fines</h1>
+          <div className='flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 w-full sm:w-auto'>
+            <SearchIcon sx={{ color: '#9ca3af', fontSize: { xs: 18, md: 20 } }} />
+            <input 
+              type="text" 
+              placeholder="Search fines..." 
+              className='bg-transparent border-none outline-none ml-2 text-xs md:text-sm w-full'
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Table */}
       <Box 
-        className="bg-white p-6 rounded-lg shadow w-full" 
+        className="hidden lg:block bg-white rounded-b-lg shadow w-full" 
         sx={{ 
           height: { xs: 500, sm: 450, md: 580 },
           width: '100%',
           overflow: 'auto'
         }}
       >
-        <div className='flex justify-between items-center mb-4'>
-          <div>
-            <h1 className='text-xl font-semibold text-gray-800'>All Fines</h1>
-        </div>
-        <div className='flex gap-2'>
-          <div className='flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-2'>
-            <SearchIcon sx={{ color: '#9ca3af', fontSize: 20 }} />
-            <input 
-              type="text" 
-              placeholder="Search fines..." 
-              className='bg-transparent border-none outline-none ml-2 text-sm'
-            />
-          </div>
-        </div>
-      </div>
-       
       <DataGrid
         rows={rowsWithBooks}
         columns={columnsWithActions}
@@ -316,6 +316,85 @@ export default function FineTable({ fines = [], loading, error, isAdmin, onPayFi
         disableRowSelectionOnClick
       />
       </Box>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden bg-white rounded-b-lg shadow p-4 space-y-3">
+        {rowsWithBooks.length > 0 ? (
+          rowsWithBooks.map((row) => (
+            <div key={row.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                    {row.bookTitle}
+                  </h3>
+                  <p className="text-xs text-gray-600">{row.user}</p>
+                </div>
+                <span
+                  style={{
+                    color: row.status === 'Paid' ? '#10b981' : '#ef4444',
+                    backgroundColor: row.status === 'Paid' ? '#d1fae5' : '#fee2e2',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    fontSize: '0.75rem',
+                    display: 'inline-block',
+                    minWidth: '70px',
+                    textAlign: 'center',
+                  }}
+                  className="ml-2 shrink-0"
+                >
+                  {row.status}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                <div>
+                  <span className="text-gray-500">Amount:</span>
+                  <div className="font-bold text-gray-900 text-base">{row.fineAmount}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500">Days Overdue:</span>
+                  <div className="font-medium text-gray-900">{row.daysOverdue}</div>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-500">Reason:</span>
+                  <div className="font-medium text-gray-900">{row.reason}</div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              {row.status !== 'Paid' && row.status !== 'Waived' ? (
+                <div className="flex gap-2 pt-3 border-t border-gray-200">
+                  <button 
+                    onClick={() => handlePayClick(row)}
+                    className="flex-1 flex items-center justify-center gap-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm"
+                  >
+                    <PaymentIcon sx={{ fontSize: 18 }} />
+                    <span>Pay</span>
+                  </button>
+                  {isAdmin && (
+                    <button 
+                      onClick={() => handleWaiveClick(row)}
+                      className="flex-1 flex items-center justify-center gap-1 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm"
+                    >
+                      <MoneyOffIcon sx={{ fontSize: 18 }} />
+                      <span>Waive</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="pt-3 border-t border-gray-200 text-center text-gray-400 text-sm">
+                  {row.status === 'Paid' ? 'Cleared' : 'Waived'}
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            No fines found
+          </div>
+        )}
+      </div>
 
       {/* Payment Modal */}
       {paymentModalOpen && (

@@ -113,19 +113,19 @@ export default function BorrowingsTable({ borrowings = [] }) {
 
   return (
     <Box 
-      className="bg-white p-8 rounded-2xl shadow-sm w-full" 
+      className="bg-white p-4 md:p-8 rounded-2xl shadow-sm w-full" 
       sx={{ 
         height: 'auto',
         width: '100%',
         overflow: 'visible'
       }}
     >
-       <div className='flex justify-between mb-4'> 
-         <div className="text-lg font-extrabold mb-4">Recent Borrowings</div>
+       <div className='flex justify-between items-center mb-4'> 
+         <div className="text-base md:text-lg font-extrabold">Recent Borrowings</div>
          <div>
            <button 
              onClick={() => navigate('/admin/borrowings/all')}
-             className="text-blue-600 font-bold hover:text-blue-800"
+             className="text-blue-600 text-sm md:text-base font-bold hover:text-blue-800"
            >
              View All
            </button>
@@ -136,6 +136,9 @@ export default function BorrowingsTable({ borrowings = [] }) {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       ) : (
+        <>
+        {/* Desktop Table */}
+        <div className="hidden lg:block">
         <DataGrid
           rows={rowsWithBooks}
           columns={columns}
@@ -203,6 +206,63 @@ export default function BorrowingsTable({ borrowings = [] }) {
         }}
         disableRowSelectionOnClick
       />
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden space-y-3">
+        {rowsWithBooks.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No borrowings found
+          </div>
+        ) : (
+          rowsWithBooks.map((row) => (
+            <div key={row.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 text-sm truncate mb-1">
+                    {row.title}
+                  </h3>
+                  <p className="text-xs text-gray-600 truncate">
+                    {row.member}
+                  </p>
+                </div>
+                <span
+                  className="ml-2 shrink-0"
+                  style={{
+                    backgroundColor:
+                      row.status === 'Borrowed' ? '#dbeafe' :
+                      row.status === 'Returned' ? '#d1fae5' :
+                      row.status === 'Overdue' ? '#fee2e2' :
+                      '#f3f4f6',
+                    color:
+                      row.status === 'Borrowed' ? '#1e40af' :
+                      row.status === 'Returned' ? '#065f46' :
+                      row.status === 'Overdue' ? '#b75656' :
+                      '#374151',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontWeight: '500',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  {row.status}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="text-gray-500">Borrowed:</span>
+                  <div className="font-medium text-gray-900">{row.borrowDate}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500">Due:</span>
+                  <div className="font-medium text-gray-900">{row.dueDate}</div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      </>
       )}
     </Box>
   );

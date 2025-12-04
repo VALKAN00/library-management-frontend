@@ -117,13 +117,13 @@ export default function MyFines() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">My Fines</h1>
-        <p className="text-gray-600">View and pay your outstanding fines</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">My Fines</h1>
+        <p className="text-sm md:text-base text-gray-600">View and pay your outstanding fines</p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-blue-100 rounded-lg">
@@ -185,14 +185,14 @@ export default function MyFines() {
           {fines.length > 0 ? (
             <div className="divide-y divide-gray-200">
               {fines.map((fine) => (
-                <div key={fine.FineID} className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col md:flex-row gap-6">
+                <div key={fine.FineID} className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
                     {/* Book Cover */}
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0 self-start">
                       <img
                         src={fine.bookCover || defaultImage}
                         alt={fine.bookTitle}
-                        className="w-24 h-32 object-cover rounded-lg shadow-md"
+                        className="w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-lg shadow-md"
                         onError={(e) => {
                           if (e.target.src !== defaultImage) {
                             e.target.src = defaultImage;
@@ -202,18 +202,18 @@ export default function MyFines() {
                     </div>
 
                     {/* Fine Details */}
-                    <div className="flex-grow">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    <div className="grow min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 mb-4">
+                        <div className="min-w-0">
+                          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 truncate">
                             {fine.bookTitle}
                           </h3>
-                          <p className="text-gray-600 text-sm">by {fine.bookAuthor}</p>
+                          <p className="text-gray-600 text-xs sm:text-sm truncate">by {fine.bookAuthor}</p>
                         </div>
                         {getStatusBadge(fine.Status)}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                         <div>
                           <p className="text-sm text-gray-600">Fine Amount</p>
                           <p className="text-xl font-bold text-red-600">

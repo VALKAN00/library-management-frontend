@@ -89,22 +89,22 @@ export default function ViewAll() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-4 md:py-8">
       {/* Header */}
-      <div className="mb-6 flex items-center gap-4">
+      <div className="mb-4 md:mb-6 flex items-center gap-2 md:gap-4">
         <button
           onClick={() => navigate('/admin/dashboard')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-gray-900 transition-colors text-sm md:text-base"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} className="md:w-5 md:h-5" />
           Back to Dashboard
         </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900">All Borrowings</h1>
-          <p className="text-gray-600 mt-1">Complete list of all book borrowings</p>
+        <div className="p-4 md:p-6 border-b border-gray-200">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">All Borrowings</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Complete list of all book borrowings</p>
         </div>
 
         {/* Loading State */}
@@ -126,7 +126,8 @@ export default function ViewAll() {
         {/* Table */}
         {!loading && !error && (
           <>
-            <div className="overflow-x-auto">
+            {/* Desktop Table */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -194,9 +195,53 @@ export default function ViewAll() {
               </table>
             </div>
 
+            {/* Mobile Cards */}
+            <div className="lg:hidden p-4 space-y-3">
+              {borrowings.length > 0 ? (
+                borrowings.map((borrowing) => {
+                  const status = getStatus(borrowing);
+                  return (
+                    <div key={borrowing.BorrowID} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                            {borrowing.bookTitle}
+                          </h3>
+                          <p className="text-xs text-gray-600">
+                            User {borrowing.CusID}
+                          </p>
+                        </div>
+                        <span
+                          className={`ml-2 shrink-0 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(
+                            status
+                          )}`}
+                        >
+                          {status}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-gray-500">Borrowed:</span>
+                          <div className="font-medium text-gray-900">{formatDate(borrowing.BorrowDate)}</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Due:</span>
+                          <div className="font-medium text-gray-900">{formatDate(borrowing.DueDate)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  No borrowings found
+                </div>
+              )}
+            </div>
+
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+              <div className="bg-white px-3 md:px-6 py-3 flex items-center justify-between border-t border-gray-200">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
