@@ -2,7 +2,7 @@ import { X, BookOpen, Check } from 'lucide-react'
 import { useState } from 'react'
 import { borrowingsAPI } from '../../api/BorrowingsApi'
 
-function BorrowModal({ isOpen, onClose, book }) {
+function BorrowModal({ isOpen, onClose, book, onSuccess }) {
   const [showSuccess, setShowSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -46,6 +46,9 @@ function BorrowModal({ isOpen, onClose, book }) {
   const handleDone = () => {
     setShowSuccess(false)
     setError('')
+    if (onSuccess) {
+      onSuccess()
+    }
     onClose()
   }
 

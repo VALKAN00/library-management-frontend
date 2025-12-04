@@ -149,23 +149,23 @@ function UserHistory() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">My History</h1>
-        <p className="text-gray-600">View your previous borrowings and reservations</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">My History</h1>
+        <p className="text-sm md:text-base text-gray-600">View your previous borrowings and reservations</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b border-gray-200">
+      <div className="flex gap-2 md:gap-4 mb-6 border-b border-gray-200 overflow-x-auto">
         <button
           onClick={() => setActiveTab("borrowings")}
-          className={`pb-4 px-6 font-semibold transition-colors relative ${
+          className={`pb-3 md:pb-4 px-3 md:px-6 font-semibold transition-colors relative whitespace-nowrap text-sm md:text-base ${
             activeTab === "borrowings"
               ? "text-indigo-600"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          <div className="flex items-center gap-2">
-            <BookOpen size={20} />
+          <div className="flex items-center gap-1 md:gap-2">
+            <BookOpen size={18} className="md:w-5 md:h-5" />
             Borrowing History
           </div>
           {activeTab === "borrowings" && (
@@ -174,14 +174,14 @@ function UserHistory() {
         </button>
         <button
           onClick={() => setActiveTab("reservations")}
-          className={`pb-4 px-6 font-semibold transition-colors relative ${
+          className={`pb-3 md:pb-4 px-3 md:px-6 font-semibold transition-colors relative whitespace-nowrap text-sm md:text-base ${
             activeTab === "reservations"
               ? "text-indigo-600"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          <div className="flex items-center gap-2">
-            <Calendar size={20} />
+          <div className="flex items-center gap-1 md:gap-2">
+            <Calendar size={18} className="md:w-5 md:h-5" />
             Reservation History
           </div>
           {activeTab === "reservations" && (
@@ -206,9 +206,9 @@ function UserHistory() {
         </div>
       )}
 
-      {/* Borrowing History Table */}
+      {/* Borrowing History Table - Desktop */}
       {!loading && !error && activeTab === "borrowings" && (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="hidden lg:block bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead className="bg-blue-200 border-b border-gray-200">
@@ -307,9 +307,71 @@ function UserHistory() {
         </div>
       )}
 
-      {/* Reservation History Table */}
+      {/* Borrowing History Cards - Mobile */}
+      {!loading && !error && activeTab === "borrowings" && (
+        <div className="lg:hidden space-y-4">
+          {borrowingHistory.length > 0 ? (
+            borrowingHistory.map((record) => {
+              const status = getBorrowingStatus(record.ReturnedDate, record.DueDate)
+              const daysOverdue = calculateDaysOverdue(record.DueDate, record.ReturnedDate)
+              
+              return (
+                <div key={record.BorrowID} className="bg-white rounded-xl shadow-lg p-4">
+                  <div className="flex gap-3 mb-3">
+                    <img
+                      src={record.BookCover || defaultImage}
+                      alt={record.bookTitle}
+                      className="w-16 h-24 object-cover rounded-lg shadow-md shrink-0"
+                      onError={(e) => {
+                        if (e.target.src !== defaultImage) {
+                          e.target.src = defaultImage
+                        }
+                      }}
+                    />
+                    <div className="grow min-w-0">
+                      <h3 className="font-semibold text-gray-900 mb-1 text-sm">
+                        {record.bookTitle}
+                      </h3>
+                      <p className="text-xs text-gray-600 mb-2">{record.author}</p>
+                      {getBorrowingStatusBadge(status, daysOverdue)}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <p className="text-gray-500 mb-1">Borrow Date</p>
+                      <p className="text-gray-700 font-medium">{formatDate(record.BorrowDate)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 mb-1">Due Date</p>
+                      <p className="text-gray-700 font-medium">{formatDate(record.DueDate)}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-gray-500 mb-1">Return Date</p>
+                      <p className={`font-medium ${
+                        status === "returned-late" ? "text-red-600" : "text-gray-700"
+                      }`}>{formatDate(record.ReturnDate)}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })
+          ) : (
+            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+              <BookOpen className="mx-auto h-16 w-16 text-gray-400 mb-3" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No Borrowing History
+              </h3>
+              <p className="text-sm text-gray-600">
+                You haven't borrowed any books yet.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Reservation History Table - Desktop */}
       {!loading && !error && activeTab === "reservations" && (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="hidden lg:block bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead className="bg-blue-200 border-b border-gray-200">
@@ -384,6 +446,57 @@ function UserHistory() {
                 No Reservation History
               </h3>
               <p className="text-gray-600">
+                You haven't made any reservations yet.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Reservation History Cards - Mobile */}
+      {!loading && !error && activeTab === "reservations" && (
+        <div className="lg:hidden space-y-4">
+          {reservationHistory.length > 0 ? (
+            reservationHistory.map((record) => (
+              <div key={record.ReservationID} className="bg-white rounded-xl shadow-lg p-4">
+                <div className="flex gap-3 mb-3">
+                  <img
+                    src={record.BookCover || defaultImage}
+                    alt={record.bookTitle}
+                    className="w-16 h-24 object-cover rounded-lg shadow-md shrink-0"
+                    onError={(e) => {
+                      if (e.target.src !== defaultImage) {
+                        e.target.src = defaultImage
+                      }
+                    }}
+                  />
+                  <div className="grow min-w-0">
+                    <h3 className="font-semibold text-gray-900 mb-1 text-sm">
+                      {record.bookTitle}
+                    </h3>
+                    <p className="text-xs text-gray-600 mb-2">{record.author}</p>
+                    {getReservationStatusBadge(record.Status)}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p className="text-gray-500 mb-1">Reservation Date</p>
+                    <p className="text-gray-700 font-medium">{formatDate(record.ReservationDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 mb-1">Expiry Date</p>
+                    <p className="text-gray-700 font-medium">{formatDate(record.ReservationExpiryDate)}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+              <Calendar className="mx-auto h-16 w-16 text-gray-400 mb-3" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No Reservation History
+              </h3>
+              <p className="text-sm text-gray-600">
                 You haven't made any reservations yet.
               </p>
             </div>

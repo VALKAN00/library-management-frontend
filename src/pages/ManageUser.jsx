@@ -21,11 +21,11 @@ export default function ManageUser() {
         setIsAddModalOpen(false);
     };  
     return (
-        <div className="container mx-auto px-4 ">
-           <div className="flex justify-between items-center mb-4">
-                <div><h1 className="text-2xl font-bold ">Manage Users</h1>
-            <p className="text-gray-600 mb-6">Add, edit, and manage user accounts.</p></div>
-                <div className="flex"><button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={openAddModal}><div className="flex gap-2"><div><Plus /></div><div> Add New User</div></div></button> <button className="px-4 py-2  mx-4 bg-blue-600 text-white rounded" onClick={openAddAdminModal}><div className="flex gap-2 "><div><Plus /></div><div> Add New Admin</div></div></button> </div>
+        <div className="container mx-auto px-4">
+           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 md:gap-0">
+                <div><h1 className="text-2xl md:text-4xl font-bold">Manage Users</h1>
+            <p className="text-sm md:text-base text-gray-600 mb-2 md:mb-6">Add, edit, and manage user accounts.</p></div>
+                <div className="flex flex-col sm:flex-row gap-2 md:gap-4 w-full md:w-auto"><button className="px-3 md:px-4 py-2 bg-blue-600 text-white rounded text-sm md:text-base" onClick={openAddModal}><div className="flex gap-2 items-center justify-center"><div><Plus size={18} className="md:w-5 md:h-5" /></div><div className="whitespace-nowrap">Add New User</div></div></button> <button className="px-3 md:px-4 py-2 bg-blue-600 text-white rounded text-sm md:text-base" onClick={openAddAdminModal}><div className="flex gap-2 items-center justify-center"><div><Plus size={18} className="md:w-5 md:h-5" /></div><div className="whitespace-nowrap">Add New Admin</div></div></button> </div>
             </div>
             {/* User management content goes here */}
             <div className="mt-6"><UsersTable /> </div>

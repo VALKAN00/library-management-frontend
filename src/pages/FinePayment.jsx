@@ -85,11 +85,11 @@ export default function FinePayment() {
     };
 
     return (
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 py-4 md:py-0">
             <div className="flex justify-between items-center mb-4">
                 <div>
-                    <h1 className="text-2xl font-bold">Fines & Payments</h1>
-                    <p className="text-gray-600">
+                    <h1 className="text-xl md:text-2xl font-bold">Fines & Payments</h1>
+                    <p className="text-sm md:text-base text-gray-600">
                         {isAdmin ? 'Manage all outstanding and paid fines' : 'View and pay your fines'}
                     </p>
                 </div>
@@ -97,7 +97,7 @@ export default function FinePayment() {
 
             {/* Statistics Cards (Admin Only) */}
             {isAdmin && statistics && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
                     <div className="bg-white p-4 rounded-lg shadow">
                         <p className="text-gray-600 text-sm">Total Fines</p>
                         <p className="text-2xl font-bold">{statistics.totalFines || 0}</p>
@@ -121,10 +121,10 @@ export default function FinePayment() {
 
             {/* Filter Tabs (Admin Only) */}
             {isAdmin && (
-                <div className="mb-4 flex gap-2">
+                <div className="mb-4 flex gap-2 overflow-x-auto">
                     <button
                         onClick={() => setFilterStatus('all')}
-                        className={`px-4 py-2 rounded-lg ${
+                        className={`px-3 md:px-4 py-2 rounded-lg text-sm md:text-base whitespace-nowrap ${
                             filterStatus === 'all'
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -134,7 +134,7 @@ export default function FinePayment() {
                     </button>
                     <button
                         onClick={() => setFilterStatus('unpaid')}
-                        className={`px-4 py-2 rounded-lg ${
+                        className={`px-3 md:px-4 py-2 rounded-lg text-sm md:text-base whitespace-nowrap ${
                             filterStatus === 'unpaid'
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -144,7 +144,7 @@ export default function FinePayment() {
                     </button>
                     <button
                         onClick={() => setFilterStatus('paid')}
-                        className={`px-4 py-2 rounded-lg ${
+                        className={`px-3 md:px-4 py-2 rounded-lg text-sm md:text-base whitespace-nowrap ${
                             filterStatus === 'paid'
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-white text-gray-700 hover:bg-gray-50'

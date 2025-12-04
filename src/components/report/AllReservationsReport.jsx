@@ -35,25 +35,23 @@ function AllReservationsReport({ data, dateRange }) {
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">All Reservations Report</h2>
-          <span className="text-gray-600">{dateRange}</span>
+      <div className="p-4 md:p-6 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">All Reservations Report</h2>
+          <span className="text-sm md:text-base text-gray-600">{dateRange}</span>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Desktop Table */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="min-w-full">
           <thead className="bg-indigo-600">
             <tr>
               <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                Member Name
+                Member ID
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                Book Title
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                Author
+                Book ID
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
                 Reservation Date
@@ -79,9 +77,6 @@ function AllReservationsReport({ data, dateRange }) {
                   <span className="text-gray-700">-</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-gray-700">{formatDate(reservation.ReservationDate)}</span>
-                </td>
-                <td className="px-6 py-4">
                   <span className="text-gray-700">{formatDate(reservation.ReservationExpiryDate)}</span>
                 </td>
                 <td className="px-6 py-4">
@@ -91,6 +86,35 @@ function AllReservationsReport({ data, dateRange }) {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden p-4 space-y-3">
+        {data.map((reservation) => (
+          <div key={reservation.ReservationID} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                  Book ID: {reservation.BookID || 'N/A'}
+                </h3>
+                <p className="text-xs text-gray-600">
+                  Member: {reservation.CusID || 'N/A'}
+                </p>
+              </div>
+              {getStatusBadge(reservation.Status)}
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-gray-500">Reserved:</span>
+                <div className="font-medium text-gray-900">{formatDate(reservation.ReservationDate)}</div>
+              </div>
+              <div>
+                <span className="text-gray-500">Expires:</span>
+                <div className="font-medium text-gray-900">{formatDate(reservation.ReservationExpiryDate)}</div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

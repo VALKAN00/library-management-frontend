@@ -173,21 +173,21 @@ export default function ManageReserve() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-4">
+        <div className="container mx-auto px-4 py-4 md:py-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 md:gap-0">
                 <div>
-                    <h1 className="text-2xl font-bold">Manage Reserve</h1>
-                    <p className="text-gray-600 mb-6">Review and manage all book reservations requests.</p>
+                    <h1 className="text-2xl md:text-4xl font-bold">Manage Reserve</h1>
+                    <p className="text-sm md:text-base text-gray-600 mb-2 md:mb-6">Review and manage all book reservations requests.</p>
                 </div>
-                <div className="flex">
+                <div className="flex w-full md:w-auto">
                     <button
                         onClick={handleOpenDialog}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        className="px-3 md:px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm md:text-base w-full md:w-auto"
                         disabled={loading}
                     >
-                        <div className="flex gap-2 items-center">
-                            <Plus size={20} />
-                            <span>New Reservation</span>
+                        <div className="flex gap-2 items-center justify-center">
+                            <Plus size={18} className="md:w-5 md:h-5" />
+                            <span className="whitespace-nowrap">New Reservation</span>
                         </div>
                     </button>
                 </div>
